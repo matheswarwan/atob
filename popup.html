@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Base64 to JSON</title>
   <link rel="stylesheet" href="./css/bootstrap.min.css">
+  <link rel="stylesheet" href="./css/json-viewer.css">
   <script src="./js/bootstrap.bundle.min.js" ></script>
   <!-- <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script> -->
   <style>
@@ -37,18 +38,25 @@
     </div>
   </div>
   <hr>
-  <b>List of sites that uses Interaction studio and has saved your data:</b>
-  <br>(Copy the encoded string to below textbox to decode)
+  <div class="text-white bg-secondary">
+    <b>List of sites that uses Interaction studio and has saved your data:</b>
+    <br>(Copy the encoded string to below textbox to decode)
+  </div>
   <hr>
   <div class="accordion" id="accordionExample"></div>
   <hr>
-  <b>Decode the encoded string below:</b>
+  <div class="text-white bg-secondary">
+    Decode the encoded string below:
+  </div>
   <hr>
   <div class="container">
-    <textarea name="atob" id="atob" cols="60" rows="10" placeholder="Enter encoded string"></textarea>
+    <textarea name="atob" id="atob" cols="60" rows="3" placeholder="Enter encoded string"></textarea>
     <hr>
-    <div class="decodedJson" id="decodedJson"></div>
+    <div class="decodedJson" id="decodedJson" hidden></div>
   </div>
+  <strong>Payload:</strong>
+	<div id="json"></div>
+  <script src="./js/json-viewer.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

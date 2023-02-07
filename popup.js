@@ -28,6 +28,8 @@ txtAreaField.addEventListener('input', function() {
     decodedJsonDiv.innerHTML = "";
     decodedJsonDiv.appendChild(document.createTextNode(JSON.stringify(decodedJson, null, 4)));
 
+
+    generateJsonViewer(decodedJson);
     //$('#decodedJson').html(JSON.stringify(decodedJson, null, 4));
   }catch(e) {
     var decodedJsonDiv = document.getElementById('decodedJson');
@@ -72,12 +74,15 @@ async function init() {
       console.log(savedItems[item]);
       var key = Object.keys(savedItems[item])[0];
       console.log(new Date(Number(key)), savedItems[item][key]['url'])
-      var dateSaved = new Date(Number(key));
+      var tmpDate = new Date(Number(key));
+      var dateSaved = tmpDate.getMonth() + "/" + tmpDate.getDate() + "/" + tmpDate.getFullYear() + " " + tmpDate.getHours() + ":" + tmpDate.getMinutes() + ":" + tmpDate.getMilliseconds();
       var savedUrl = new URL(decodeURIComponent(savedItems[item][key]['url'] ));
       var encodedString = savedUrl.search.replace('?event=','')
 
+      var isPayloadAction = savedItems[item][key]['payload']['action'];
+
       var itemToShow = Number(item) + 1; 
-      tableItems += `<div><strong>${itemToShow}) ${dateSaved}</strong></div><br><div>${encodedString}</div><br>`
+      tableItems += `<div><strong>${itemToShow}) ${dateSaved} - ${isPayloadAction} </strong></div><br><div class="ck-encodedString">${encodedString}</div><br>`
     }
 
     var tmpHtml  = `
@@ -99,6 +104,18 @@ async function init() {
 
     return accordionHtml;
   }
+
+  //Add click to Copy functionality
+  document.querySelectorAll('.ck-encodedString').forEach(function(item) {
+    console.log(item)
+    item.addEventListener('click', function () {
+      navigator.clipboard.writeText(item.innerHTML);
+      document.getElementById('atob').innerHTML = item.innerHTML;
+      var event = new Event('input');
+      document.getElementById('atob').dispatchEvent(event);
+      //alert('copied to clipboard')
+    });
+  });
 }
 
 async function clearAll() {
@@ -111,3 +128,32 @@ async function clearAll() {
 }
 init();
 
+
+
+//Json viewer 
+function generateJsonViewer(jsonObj) { 
+  //var jsonObj = {};
+  var jsonViewer = new JSONViewer();
+  document.querySelector("#json").appendChild(jsonViewer.getContainer());
+
+  var textarea = document.querySelector("atob");
+  // textarea value to JSON object
+  var setJSON = function() {
+    try {
+      // var value = textarea.value;
+      // console.log('value in generate json viewer ', value)
+      // jsonObj = JSON.parse(value);
+      console.log('jsonObj in generate json viewer ', jsonObj)
+    }
+    catch (err) {
+      alert(err);
+    }
+  };
+
+  // load default value
+  setJSON();
+
+  jsonViewer.showJSON(jsonObj); //Show all 
+  // jsonViewer.showJSON(jsonObj, null, 1); //Collapse to level 1  
+  //jsonViewer.showJSON(jsonObj, 1); // Show only level 1
+}
