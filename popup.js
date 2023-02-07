@@ -1,4 +1,4 @@
-
+//TODO: When clearall is clicked, clear the payload text
 /* $('#atob').on('change', function() {
   console.log('Encoded String ' , $(this).val());
   
@@ -16,25 +16,27 @@ document.getElementById('BtnClear').addEventListener('click', clearAll);
 var txtAreaField = document.getElementById('atob');
 txtAreaField.addEventListener('input', function() {
   
-  console.log('Encoded Text' + txtAreaField.value);
+  //console.log('Encoded Text' + txtAreaField.value);
   var encodedString = txtAreaField.value;
   try { 
     var decodedString = atob(encodedString);
     var decodedJson = JSON.parse(decodedString);
-    console.log(decodedJson);
+    //console.log(decodedJson);
 
 
-    var decodedJsonDiv = document.getElementById('decodedJson');
-    decodedJsonDiv.innerHTML = "";
-    decodedJsonDiv.appendChild(document.createTextNode(JSON.stringify(decodedJson, null, 4)));
+    //var decodedJsonDiv = document.getElementById('decodedJson');
+    //decodedJsonDiv.innerHTML = "";
+    //decodedJsonDiv.appendChild(document.createTextNode(JSON.stringify(decodedJson, null, 4)));
 
 
     generateJsonViewer(decodedJson);
     //$('#decodedJson').html(JSON.stringify(decodedJson, null, 4));
   }catch(e) {
-    var decodedJsonDiv = document.getElementById('decodedJson');
-    decodedJsonDiv.innerHTML = "";
-    decodedJsonDiv.appendChild(document.createTextNode('Error: Invalid Base64 text'));
+    var errorDiv = 
+    $('#json').empty().html('<font color="red">Error: Invalid Base64 text</font>')
+    //var decodedJsonDiv = document.getElementById('json');
+    //decodedJsonDiv.innerHTML = "";
+    //decodedJsonDiv.appendChild(document.createTextNode('Error: Invalid Base64 text'));
   }
 });
 
@@ -42,10 +44,44 @@ txtAreaField.addEventListener('input', function() {
 
 // Filling Accordian 
 
+/*function sortObject(o) {
+  console.log('Sort Object has ', o)
+  var sorted = {},
+  key, a = [];
+
+  for (key in o) {
+      if (o.hasOwnProperty(key)) {
+          a.push(key);
+      }
+  }
+
+  a = a.reverse();
+  console.log('Reverse sorted ' , a)
+
+  for (key = 0; key < a.length; key++) {
+      sorted[a[key]] = o[a[key]];
+  }
+  return sorted;
+}*/
+
+
 async function getData() {
   return new Promise( (resolve, reject) => {
     chrome.storage.local.get(null, function(items){
-      console.log('items in getData ', items);
+      //console.log('items in getData ', items);
+      /* for(k in Object.keys(items)) {
+        var keysArray = [];
+        for(i in o) {
+            keysArray.push(Object.keys(o[i])[0])
+        }
+        keysArray.reverse();
+      }
+
+      sortedItems = {}
+      for(k in Object.keys(items)) {
+        sortedItems[Object.keys(items)[k]] = sortObject(items[Object.keys(items)[k]])
+      }
+      console.log('Sorted Items ' , sortedItems) */
       resolve(items);
     });
   });
@@ -54,7 +90,7 @@ async function getData() {
 async function init() {
   var o = await getData();
   
-  console.log(Object.keys(o))
+  //console.log(Object.keys(o))
 
   var listOfSites = Object.keys(o);
 
@@ -66,23 +102,25 @@ async function init() {
 
 
   function generateAccordianItems(itemNumber, hostName) {
-    console.log(hostName)
+    //console.log(hostName)
 
     var tableItems = '';
     var savedItems = o[hostName];
     for(item in savedItems){
-      console.log(savedItems[item]);
+      //console.log(savedItems[item]);
       var key = Object.keys(savedItems[item])[0];
-      console.log(new Date(Number(key)), savedItems[item][key]['url'])
+      //console.log(new Date(Number(key)), savedItems[item][key]['url'])
       var tmpDate = new Date(Number(key));
-      var dateSaved = tmpDate.getMonth() + "/" + tmpDate.getDate() + "/" + tmpDate.getFullYear() + " " + tmpDate.getHours() + ":" + tmpDate.getMinutes() + ":" + tmpDate.getMilliseconds();
+      // var dateSaved = tmpDate.getMonth() + "/" + tmpDate.getDate() + "/" + tmpDate.getFullYear() + " " + tmpDate.getHours() + ":" + tmpDate.getMinutes() + ":" + tmpDate.getMilliseconds();
+      var dateSince = moment(tmpDate).fromNow();
+      //console.log(dateSince)
       var savedUrl = new URL(decodeURIComponent(savedItems[item][key]['url'] ));
       var encodedString = savedUrl.search.replace('?event=','')
 
-      var isPayloadAction = savedItems[item][key]['payload']['action'];
+      var isPayloadAction = (savedItems[item][key]['payload']['action'] ? savedItems[item][key]['payload']['action'] : 'Action Not defined') ;
 
       var itemToShow = Number(item) + 1; 
-      tableItems += `<div><strong>${itemToShow}) ${dateSaved} - ${isPayloadAction} </strong></div><br><div class="ck-encodedString">${encodedString}</div><br>`
+      tableItems += `<div>${itemToShow}) ${dateSince} (Action: ${isPayloadAction})<button type="button" class="btn btn-link ck-viewEncodedString" encodedString="${encodedString}">View</div>`
     }
 
     var tmpHtml  = `
@@ -107,7 +145,7 @@ async function init() {
 
   //Add click to Copy functionality
   document.querySelectorAll('.ck-encodedString').forEach(function(item) {
-    console.log(item)
+    // console.log(item)
     item.addEventListener('click', function () {
       navigator.clipboard.writeText(item.innerHTML);
       document.getElementById('atob').innerHTML = item.innerHTML;
@@ -116,6 +154,23 @@ async function init() {
       //alert('copied to clipboard')
     });
   });
+
+  document.querySelectorAll('.ck-viewEncodedString').forEach(function(item) {
+    // console.log(item)
+    item.addEventListener('click', function () {
+      //document.getElementsByClassName('ck-viewEncodedString')[0].getAttribute('encodedstring')
+      //navigator.clipboard.writeText(item.getAttribute('encodedstring'));
+      //document.getElementById('atob').innerHTML = "";
+      //document.getElementById('atob').innerHTML = item.getAttribute('encodedstring');
+      $('#atob').val(item.getAttribute('encodedstring'));
+      console.log(item.getAttribute('encodedstring'))
+      var event = new Event('input');
+      document.getElementById('atob').dispatchEvent(event);
+      //alert('copied to clipboard')
+    });
+  });
+
+
 }
 
 async function clearAll() {
@@ -134,6 +189,7 @@ init();
 function generateJsonViewer(jsonObj) { 
   //var jsonObj = {};
   var jsonViewer = new JSONViewer();
+  document.querySelector("#json").innerHTML = '';
   document.querySelector("#json").appendChild(jsonViewer.getContainer());
 
   var textarea = document.querySelector("atob");
@@ -141,9 +197,9 @@ function generateJsonViewer(jsonObj) {
   var setJSON = function() {
     try {
       // var value = textarea.value;
-      // console.log('value in generate json viewer ', value)
+      // // console.log('value in generate json viewer ', value)
       // jsonObj = JSON.parse(value);
-      console.log('jsonObj in generate json viewer ', jsonObj)
+      // console.log('jsonObj in generate json viewer ', jsonObj)
     }
     catch (err) {
       alert(err);
