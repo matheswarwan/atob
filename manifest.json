@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "MCP Logger",
+  "description": "Log all MCP (Interaction Studio) events and convert base64 string to JSON",
+  "version": "1.0",
+  "author": "mathes.btech@gmail.com",
+  "version_name": "1.0 beta",
+  "icons": {
+    "16": "/images/get_started16.png",
+    "32": "/images/get_started32.png",
+    "48": "/images/get_started48.png",
+    "128": "/images/get_started128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [  
+        "css/bootstrap.min.css",
+        "js/jquery-3.6.3.js",
+        "js/bootstrap.bundle.min.js"
+    ],
+      "matches": [ "<all_urls>" ]
+    }
+   
+  ],
+  "content_security_policy": {
+    "script-src": "self",
+    "object-src": "self"
+ },
+ "background": {
+  "service_worker": "js/background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions":[
+    "storage",
+    "webRequest",
+    "unlimitedStorage",
+    "webNavigation"
+  ],
+  "host_permissions" : [
+    "<all_urls>"
+  ]
+}
