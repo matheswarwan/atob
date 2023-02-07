@@ -1,10 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "MCP Logger",
-  "description": "Log all MCP (Interaction Studio) events and convert base64 string to JSON",
-  "version": "1.0",
+  "name": "Interaction Studio (MCP) Logger",
+  "description": "Logs all MCP (Interaction Studio) events and convert base64 string to JSON",
+  "version": "0.0.0.1",
   "author": "mathes.btech@gmail.com",
-  "version_name": "1.0 beta",
+  "version_name": "0.0.0.1 beta",
   "icons": {
     "16": "/images/get_started16.png",
     "32": "/images/get_started32.png",
