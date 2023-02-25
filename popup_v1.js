@@ -1,3 +1,4 @@
+//TODO: When clearall is clicked, clear the payload text
 /* $('#atob').on('change', function() {
   console.log('Encoded String ' , $(this).val());
   
@@ -87,11 +88,6 @@ async function getData() {
 }
 
 async function init() {
-
-  //Reset UI
-  document.getElementById('json').innerHTML = 'Decoded Payload will appear here!';
-  document.getElementById('atob').value = '';
-
   var o = await getData();
   
   //console.log(Object.keys(o))
@@ -99,20 +95,12 @@ async function init() {
   var listOfSites = Object.keys(o);
 
   document.getElementById('accordionExample').innerHTML = ''; //Clear for first time
-  if(listOfSites.length > 0) {
-    for(l in listOfSites) {
-      var accordionHtml = generateAccordianItems(l, listOfSites[l]);
-      document.getElementById('accordionExample').appendChild(accordionHtml);
-    }
-  } else {
-    //No sites captured 
-    document.getElementById('accordionExample').innerHTML = 
-    `
-    <div class="alert alert-info" role="alert">
-      No sites captured yet.
-    </div>
-    `;
+  for(l in listOfSites) {
+    var accordionHtml = generateAccordianItems(l, listOfSites[l]);
+    document.getElementById('accordionExample').appendChild(accordionHtml);
+
   }
+
 
   function generateAccordianItems(itemNumber, hostName) {
     //console.log(hostName)
@@ -136,7 +124,7 @@ async function init() {
 
       //var itemToShow = Number(item) + 1; 
       var itemClass = (htmlBulletCounter <= 5 ? 'ck-item-show':'ck-item-hide');
-      tableItems += `<div class="${itemClass} ck-itemNumber-${htmlBulletCounter} accordion-body text-start">${htmlBulletCounter}) ${dateSince} (Action: ${isPayloadAction})<button type="button" class="btn btn-link ck-viewEncodedString" encodedString="${encodedString}">View</div>`;
+      tableItems += `<div class="${itemClass} ck-itemNumber-${htmlBulletCounter}">${htmlBulletCounter}) ${dateSince} (Action: ${isPayloadAction})<button type="button" class="btn btn-link ck-viewEncodedString" encodedString="${encodedString}">View</div>`;
 
       htmlBulletCounter++;
     }
@@ -144,30 +132,17 @@ async function init() {
     var showMoreDiv = `<div class="ck-showMore">Show more</div>`;
     showMoreDiv = (savedItems.length > 5 ? showMoreDiv : '');
     var tmpHtml  = `
-      <div class="accordion" id="heading_${itemNumber}">
-      <div class="accordion-item mb-3">
-            <h2 class="accordion-header">
-              <button
-                type="button"
-                class="accordion-button collapsed"
-                data-bs-toggle="collapse"
-                data-bs-target="#collapse_${itemNumber}"
-              >
-                ${hostName}
-              </button>
-            </h2>
-            <div
-              class="accordion-collapse collapse"
-              id="collapse_${itemNumber}"
-              data-bs-parent="#accordionSection"
-            >
-              <div class="accordion-body text-start">
-                ${tableItems}
-                ${showMoreDiv}
-              </div>
-            </div>
+      <h2 class="accordion-header" id="heading_${itemNumber}">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_${itemNumber}" aria-expanded="false" aria-controls="collapse_${itemNumber}">
+          ${hostName}
+        </button>
+      </h2>
+      <div id="collapse_${itemNumber}" class="accordion-collapse collapse" aria-labelledby="heading_${itemNumber}" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+          ${tableItems}
+          ${showMoreDiv}
           </div>
-        </div>
+      </div>
     `;
 
     var accordionHtml = document.createElement('div');

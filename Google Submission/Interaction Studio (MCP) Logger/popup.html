@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Base64 to JSON</title>
+  <link rel="stylesheet" href="./css/bootstrap.min.css">
+  <link rel="stylesheet" href="./css/json-viewer.css">
+  <script src="./js/jquery-3.6.3.js" ></script>
+  <script src="./js/bootstrap.bundle.min.js" ></script>
+  <script src="./js/moment-with-locales.min.js"></script>
+  <script src="./js/json-viewer.js"></script>
+  <!-- <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script> -->
+  <style>
+    html {
+      height: 800px;
+      width: 600px;
+      background: #f5f5f5;
+    }
+    .decodedJson { 
+      white-space: pre; 
+      font-family: monospace; 
+      color: black;
+    }
+    *.x {
+      border: 1px solid;
+    }
+  </style>
+</head>
+<body>
+  <!-- <label for="atob">Encoded String</label> -->
+  <div class="container">
+    <div class="row pt-2">
+      <div class="col-sm text-start">
+        <button id="BtnRefresh" class="btn btn-primary">Refresh</button>
+      </div>
+      <div class="col-sm text-end">
+        <button id="BtnClear" class="btn btn-danger">Clear All</button>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="px-3 text-white bg-secondary">
+    Sites that sends events to Evergage:
+  </div>
+  <hr>
+  <div class="accordion" id="accordionExample"></div>
+  <hr>
+  <div class="px-3 text-white bg-secondary">
+    Decode the encoded string below:
+  </div>
+  <hr>
+  <div class="container">
+    <textarea name="atob" id="atob" cols="60" rows="1" placeholder="Enter encoded string"></textarea>
+    <hr>
+    <div class="decodedJson" id="decodedJson" hidden></div>
+	  <div id="json">Decoded Payload will appear here!</div>
+  </div>
+  <hr>
+  <script src="popup.js"></script>
+</body>
+</html>
