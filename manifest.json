@@ -1,4 +1,5 @@
 {
+  "update_url": "https://clients2.google.com/service/update2/crx",
   "manifest_version": 3,
   "name": "Interaction Studio (MCP) Logger",
   "description": "Logs & Stores all Interaction Studio (MCP) events in local storage and converts base64 string to readable JSON",
