@@ -124,7 +124,7 @@ async function init() {
     for(var item = savedItems.length-1; item >= 0 ; item--){
       //console.log(savedItems[item]);
       var key = Object.keys(savedItems[item])[0];
-      //consoßle.log(new Date(Number(key)), savedItems[item][key]['url'])
+      //console.log(new Date(Number(key)), savedItems[item][key]['url'])
       var tmpDate = new Date(Number(key));
       // var dateSaved = tmpDate.getMonth() + "/" + tmpDate.getDate() + "/" + tmpDate.getFullYear() + " " + tmpDate.getHours() + ":" + tmpDate.getMinutes() + ":" + tmpDate.getMilliseconds();
       var dateSince = moment(tmpDate).fromNow();
@@ -136,12 +136,12 @@ async function init() {
 
       //var itemToShow = Number(item) + 1; 
       var itemClass = (htmlBulletCounter <= 5 ? 'ck-item-show':'ck-item-hide');
-      tableItems += `<div class="${itemClass} ck-itemNumber-${htmlBulletCounter} accordion-body text-start">${htmlBulletCounter}) ${dateSince} (Action: ${isPayloadAction})<button type="button" class="btn btn-link ck-viewEncodedString" encodedString="${encodedString}">View</div>`;
+      tableItems += `<div class="${itemClass} ck-itemNumber-${htmlBulletCounter} accordion-body text-start" style="padding-top: 0px !important; padding-bottom: 0px !important" >${htmlBulletCounter}) ${dateSince} (Action: ${isPayloadAction})<button type="button" class="btn btn-link ck-viewEncodedString" encodedString="${encodedString}" accordionId="${'collapse_'+itemNumber}">View</div>`;
 
       htmlBulletCounter++;
     }
 
-    var showMoreDiv = `<div class="ck-showMore">Show more</div>`;
+    var showMoreDiv = `<a class="ck-showMore">Show All</a>`;
     showMoreDiv = (savedItems.length > 5 ? showMoreDiv : '');
     var tmpHtml  = `
       <div class="accordion" id="heading_${itemNumber}">
@@ -177,10 +177,16 @@ async function init() {
     return accordionHtml;
   }
 
+  function generateAccordianItemsWithPagination(itemNumber, hostName, pageNumber) {
+    // pageNumber - current page Number * 5 gives the elements to show
+    // TODO: Work on pagingation
+  }
+
   //Add click to Copy functionality
   document.querySelectorAll('.ck-showMore').forEach(function(item){
     item.addEventListener('click', function(){
       $('.ck-item-hide').addClass('ck-item-show').removeClass('ck-item-hide');
+      $('.ck-showMore').addClass('ck-item-hide');
     });
   });
 
@@ -207,6 +213,13 @@ async function init() {
       var event = new Event('input');
       document.getElementById('atob').dispatchEvent(event);
       //alert('copied to clipboard')
+
+      // hide accordion 
+      var accordionId = $(this).attr('accordionId');
+      console.log(accordionId);
+      $('#'+accordionId).removeClass('show');
+      //$('button[data-bs-target="#collapse_0"]').removeClass('collapsed');
+
     });
   });
 

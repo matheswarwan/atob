@@ -3,9 +3,9 @@
   "manifest_version": 3,
   "name": "Interaction Studio (MCP) Logger",
   "description": "Logs & Stores all Interaction Studio (MCP) events in local storage and converts base64 string to readable JSON",
-  "version": "0.0.0.3",
+  "version": "0.0.0.4",
   "author": "mathes.btech@gmail.com",
-  "version_name": "0.0.0.3 beta",
+  "version_name": "0.0.0.4 beta",
   "icons": {
     "16": "/images/cloud/cloud-16.png",
     "32": "/images/cloud/cloud-32.png",
@@ -19,7 +19,8 @@
         "css/json-viewer.css",
         "js/jquery-3.6.3.js",
         "js/bootstrap.bundle.min.js",
-        "js/json-viewer.js"
+        "js/json-viewer.js",
+        "images/activeImg/cloud-48.png"
     ],
       "matches": [ "<all_urls>" ]
     }
