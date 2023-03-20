@@ -1,9 +1,9 @@
 # Introduction: 
-This addon logs all Interaction Studio events that are sent to Salesforce's Marketing Cloud Personalization server and stores the event details in local storage. As the payload is base64 encoded, the add-on decodes it and displays a formatted JSON content that would be easy for developers and testers to debug the app.
+This addon logs all events that are sent to Salesforce's Marketing Cloud Personalization server by evergage.min.js beacon, and stores the event details in local storage. As the payload is base64 encoded, the add-on decodes it and displays a formatted JSON content that would be easy for developers and testers to debug the app.
 
 ## Installation instruction: 
 
-1. Unzip the extension - Drive link 
+1. Unzip the extension
 2. Open chrome://extensions
 3. Enable Developer mode
 4. Click ‘Load Unpacked’ 
