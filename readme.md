@@ -12,12 +12,12 @@ This addon logs all events that are sent to Salesforce's Marketing Cloud Persona
 <img src="gitImages/1.png" width="200px" height="125px"/>
 
 6. Open sites that have interaction studio. Example,
-    a. Alc.ca
-    b. Salesforce.com
-    c. becu.org 
-    d. macro.com.ar
-    e. lendingclub.com 
-    f. zebra.com 
+* Alc.ca
+* Salesforce.com
+* becu.org 
+* macro.com.ar
+* lendingclub.com 
+* zebra.com 
 7. When an event is recorded, the addon would change color for 5 seconds and it’ll be available in the addon's popup.
 
 <img src="gitImages/2.png" width="200px" height="250px"/>
