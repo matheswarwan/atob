@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fire IS Event</title>
+    <link
+      rel="stylesheet"
+      href="./assets/salesforce-lightning-design-system.min.css"
+    />
+    <script src="./assets/jquery-3.6.3.js"></script>
+    <script src="./assets/moment-with-locales.min.js"></script>
+    <script src="./assets/axios.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <button class="slds-button slds-button_brand" id="is-fire-event">
+        Fire Browse
+      </button>
+      <button class="slds-button slds-button_brand" id="is-fire-event-add-to-cart">
+        Fire add to cart
+      </button>
+      <button class="slds-button slds-button_brand" id="is-fire-event-purchase">
+        Fire Purchase
+      </button>
+      <hr />
+      <div class="slds-summary-detail slds-is-open">
+        <button
+          class="slds-button slds-button_icon slds-m-right_x-small"
+          title="Toggle details for Summary Title"
+          aria-controls="expando-unique-id"
+          aria-expanded="true"
+        >
+          <svg
+            class="slds-button__icon slds-summary-detail__action-icon"
+            aria-hidden="true"
+          >
+            <use xlink:href="/assets/symbols.svg#switch"></use>
+          </svg>
+          <span class="slds-assistive-text"
+            >Toggle details for Summary Title</span
+          >
+        </button>
+        <div>
+          <div class="slds-summary-detail__title">
+            <h3
+              class="slds-text-heading_small slds-truncate"
+              title="summary title"
+            >
+              Fire Event Details
+            </h3>
+          </div>
+          <div
+            aria-hidden="false"
+            class="slds-summary-detail__content"
+            id="is-fire-event-response"
+          >
+            <p>...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      let accountDetails = [{
+        hostName: 'thesource.us-1',
+        dataSet: 'cart_browse',
+        type: 'Dev'
+      }]
+
+      let cartBrowse = {
+        url: "https://thesource.us-1.evergage.com/api2/event/cart_browse",
+        payload: {
+          action: "product_detail",
+          itemAction: "View Item",
+          source: {
+            pageType: "product_detail",
+            locale: "en_CA",
+            contentZones: [
+              "global_sliver",
+              "pdp_also_bought",
+              "pdp_also_liked",
+              "pdp_banner",
+            ],
+            url: "https://www.thesource.ca/en-ca/audio-headphones/headphones/all-headphones/bose-quietcomfort%c2%ae-45-over-ear-wireless-headphones---black/p/108096091",
+            urlReferrer:
+              "https://www.thesource.ca/en-ca/audio-headphones/headphones/all-headphones/bose-quietcomfort%c2%ae-45-over-ear-wireless-headphones---black/p/108096091",
+            channel: "Web",
+            beaconVersion: 16,
+            configVersion: "35",
+          },
+          flags: { pageView: true },
+          user: {
+            attributes: {
+              customerType: "B2C",
+              loggedInStatus: "notLoggedIn",
+              gaUserId: "",
+            },
+            anonId: "1c3c70df55af5bcb",
+            encryptedId:
+              "tJow7Dia6KUlMXS_ai_drRwUnOig0WeaAgW_ALHAAt8dBHex5i9VjxUBIvs-kMY-VWevvYHmty15UpBTtpwDvQi3R8-MapnXkz3GFhXSXBhYUCP2NDnjAm9MY_jsplAc",
+          },
+          performance: {},
+          debug: { explanations: true },
+          catalog: {
+            Product: {
+              _id: "108096091",
+              categories: [
+                {
+                  type: "c",
+                  _id: "audio_and_headphones|headphones|noise-cancelling_headphones",
+                },
+              ],
+              name: "Bose QuietComfort  45 Over-Ear Wireless Headphones - Black",
+              imageUrl:
+                "http://www.thesource.ca/medias/20210827133203-108096091-A.jpg-mediaConversion-640-x-480-0?context=bWFzdGVyfGltYWdlc3wyMTU0NnxpbWFnZS9qcGVnfGltYWdlcy9oMTkvaDlhLzk0NDY3NzMzMjU4NTQuanBnfDk3MmY2OTljNDA3OGFkMTdiOTRiODAwNjZjMDE4M2Q5MDE2OTU5YTJiNDA4ZTJlZDg3ODUzYzVlOTg2NDU0ZjU",
+              url: "https://www.thesource.ca/en-ca/audio-headphones/headphones/all-headphones/bose-quietcomfort%c2%ae-45-over-ear-wireless-headphones---black/p/108096091",
+              price: 389.99,
+              inventoryCount: 1,
+              description:
+                "Bose QuietComfort® 45 headphones - wireless headphones with the perfect balance of quiet, comfort and sound.",
+            },
+          },
+          consents: [],
+          account: {},
+          _toolsEventLinkId: "4396623577331795",
+        },
+      };
+
+      let addToCart = {
+        url: "https://thesource.us-1.evergage.com/api2/event/cart_browse",
+        payload: {"action":"cart","itemAction":"View Cart","source":{"pageType":"cart","locale":"en_CA","contentZones":["global_sliver","cart_recommendations"],"url":"https://www.thesource.ca/en-ca/cart","urlReferrer":"https://www.thesource.ca/en-ca","channel":"Web","beaconVersion":16,"configVersion":"83"},"flags":{"pageView":true},"user":{"attributes":{"customerType":"B2C","loggedInStatus":"loggedIn","gaUserId":"19b86a02-0056-4c79-a6ae-e58b75911129","emailAddress":"mathes.btech@gmail.com","emailAddress2":"mathes.btech@gmail.com"},"anonId":"1c3c70df55af5bcb","encryptedId":"gCmT8nwiQVXURw2IM8b60xyKXHto1WKx68xGKAfhduQ1vmCwgkmNYTi5ROarUbf4z98QEoAphNuzLsoFfdt7JVah0dOgp0lpSGnNFWUs89uQCzNwT0TmlhTtE2hRfAF_"},"performance":{},"debug":{"explanations":true},"cart":{"complete":{"Product":[]}},"consents":[],"account":{},"_toolsEventLinkId":"6861123964849578"}
+      } 
+
+      let orderConfirmation = {
+        url: "https://thesource.us-1.evergage.com/api2/event/cart_browse",
+        payload_original: {"action":"order_confirmation","itemAction":"Purchase","source":{"pageType":"order_confirmation","locale":"en_CA","contentZones":["global_sliver"],"url":"https://www.thesource.ca/en-ca/checkout/orderConfirmation/3854810","urlReferrer":"https://www.thesource.ca/en-ca/payments/globalPayments/redirects/globalPayments?CSRFToken=c810cf66-e61c-4582-a282-243d3af31729","channel":"Web","beaconVersion":16,"configVersion":"83"},"flags":{"pageView":true},"user":{"attributes":{"customerType":"B2C","loggedInStatus":"loggedIn","gaUserId":"19b86a02-0056-4c79-a6ae-e58b75911129","emailAddress":"mathes.btech@gmail.com","emailAddress2":"mathes.btech@gmail.com"},"anonId":"1c3c70df55af5bcb","encryptedId":"gCmT8nwiQVXURw2IM8b60xyKXHto1WKx68xGKAfhduQ1vmCwgkmNYTi5ROarUbf4z98QEoAphNuzLsoFfdt7JVah0dOgp0lpSGnNFWUs89uQCzNwT0TmlhTtE2hRfAF_"},"performance":{},"debug":{"explanations":true},"order":{"Product":{"totalValue":11.54,"lineItems":[]}},"consents":[],"account":{},"_toolsEventLinkId":"2980718585972708"},
+        payload: {
+          "action": "order_confirmation",
+          "itemAction": "Purchase",
+          "order":{
+            "Product":{"totalValue":100.00,"lineItems":[]
+            }
+          },
+          "source": {
+            "pageType": "order_confirmation",
+            "locale": "en_CA",
+            "contentZones": [
+              "global_sliver"
+            ],
+            "url": "https://www.thesource.ca/en-ca/checkout/orderConfirmation/3854810",
+            "urlReferrer": "https://www.thesource.ca/en-ca/payments/globalPayments/redirects/globalPayments?CSRFToken=c810cf66-e61c-4582-a282-243d3af31729",    
+            "channel": "Web",
+            "beaconVersion": 16,
+            "configVersion": "83"
+          },
+          "flags": {
+            "pageView": true
+          },
+          "user": {
+            "attributes": {
+              "customerType": "B2C",
+              "loggedInStatus": "loggedIn",
+              "gaUserId": "19b86a02-0056-4c79-a6ae-e58b75911129",
+              "emailAddress": "mathes.btech@gmail.com",
+              "emailAddress2": "mathes.btech@gmail.com"
+            },
+            "anonId": "1c3c70df55af5bcb",
+            "encryptedId": "gCmT8nwiQVXURw2IM8b60xyKXHto1WKx68xGKAfhduQ1vmCwgkmNYTi5ROarUbf4z98QEoAphNuzLsoFfdt7JVah0dOgp0lpSGnNFWUs89uQCzNwT0TmlhTtE2hRfAF_"
+          },
+          "performance": {},
+          "debug": {
+            "explanations": true
+          },
+          "consents": [],
+          "account": {},
+          "_toolsEventLinkId": "6861123964849578"
+        }
+      } 
+
+      let isEventBtn = $("#is-fire-event");
+      let isEventAddToCartBtn = $("#is-fire-event-add-to-cart");
+      let isEventPurchase = $("#is-fire-event-purchase");
+      let isEventResponseWindow = $("#is-fire-event-response");
+      
+      isEventBtn.on("click", async function () {
+        let body = "event=" + encodeURIComponent(JSON.stringify(cartBrowse.payload));
+        let result = await axiosPost(cartBrowse.url, body);
+        if(result.status == 200) {
+          let reqUrl = result.config.url; 
+          let reqData = result.config.data; 
+          let respData = JSON.stringify(result.data);
+          isEventResponseWindow.html('').html(`<br>${reqUrl}<br>${reqData}<br>${respData}`)
+        }
+        console.log(result);
+      });
+
+      isEventAddToCartBtn.on("click", async function () {
+        let body = "event=" + encodeURIComponent(btoa(JSON.stringify(addToCart.payload))) ;
+        let result = await axiosGet(addToCart.url, body);
+        if(result.status == 200) {
+          let reqUrl = result.config.url; 
+          let respData = JSON.stringify(result.data);
+          isEventResponseWindow.html('').html(`<br>${reqUrl}<br>${respData}`)
+        }
+        console.log(result);
+      });
+
+      isEventPurchase.on("click", async function () {
+        let body = "event=" + encodeURIComponent(btoa(JSON.stringify(orderConfirmation.payload))) ;
+        let result = await axiosGet(orderConfirmation.url, body);
+        if(result.status == 200) {
+          let reqUrl = result.config.url; 
+          let respData = JSON.stringify(result.data);
+          isEventResponseWindow.html('').html(`<br>${reqUrl}<br>${respData}`)
+        }
+        console.log(result);
+      });
+
+      //console.log(isEventBtn);
+    </script>
+    <script>
+      function axiosPost(url, body) {
+        return new Promise( (resolve, reject) => {
+          axios
+          .post(url, body)
+          //JSON.stringify({ event: cartBrowse.payload } ))
+          .then(function (result) {
+            resolve(result);
+          });
+        });
+      }
+
+      function axiosGet(url, body) {
+        return new Promise( (resolve, reject) => {
+          axios
+          .get(url + "?" + body)
+          //JSON.stringify({ event: cartBrowse.payload } ))
+          .then(function (result) {
+            resolve(result);
+          });
+        });
+      }
+    </script>
+  </body>
+</html>
+<!-- 
+
+fetch("https://thesource.us-1.evergage.com/api2/event/cart_browse", {
+  "headers": {
+    "accept": "application/json, text/javascript, */*; q=0.01",
+    "accept-language": "en-US,en;q=0.9,ta;q=0.8",
+    "content-type": "application/x-www-form-urlencoded",
+    "sec-ch-ua": "\"Google Chrome\";v=\"111\", \"Not(A:Brand\";v=\"8\", \"Chromium\";v=\"111\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"macOS\"",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "cross-site"
+  },
+  "referrer": "https://www.thesource.ca/",
+  "referrerPolicy": "strict-origin-when-cross-origin",
+  "body": "event=%7B%22action%22%3A%22product_detail%22%2C%22itemAction%22%3A%22View%20Item%22%2C%22source%22%3A%7B%22pageType%22%3A%22product_detail%22%2C%22locale%22%3A%22en_CA%22%2C%22contentZones%22%3A%5B%22global_sliver%22%2C%22pdp_also_bought%22%2C%22pdp_also_liked%22%2C%22pdp_banner%22%5D%2C%22url%22%3A%22https%3A%2F%2Fwww.thesource.ca%2Fen-ca%2Faudio-headphones%2Fheadphones%2Fall-headphones%2Fbose-quietcomfort%25c2%25ae-45-over-ear-wireless-headphones---black%2Fp%2F108096091%22%2C%22urlReferrer%22%3A%22https%3A%2F%2Fwww.thesource.ca%2Fen-ca%2Faudio-headphones%2Fheadphones%2Fall-headphones%2Fbose-quietcomfort%25c2%25ae-45-over-ear-wireless-headphones---black%2Fp%2F108096091%22%2C%22channel%22%3A%22Web%22%2C%22beaconVersion%22%3A16%2C%22configVersion%22%3A%2235%22%7D%2C%22flags%22%3A%7B%22pageView%22%3Atrue%7D%2C%22user%22%3A%7B%22attributes%22%3A%7B%22customerType%22%3A%22B2C%22%2C%22loggedInStatus%22%3A%22notLoggedIn%22%2C%22gaUserId%22%3A%22%22%7D%2C%22anonId%22%3A%221c3c70df55af5bcb%22%2C%22encryptedId%22%3A%22tJow7Dia6KUlMXS_ai_drRwUnOig0WeaAgW_ALHAAt8dBHex5i9VjxUBIvs-kMY-VWevvYHmty15UpBTtpwDvQi3R8-MapnXkz3GFhXSXBhYUCP2NDnjAm9MY_jsplAc%22%7D%2C%22performance%22%3A%7B%7D%2C%22debug%22%3A%7B%22explanations%22%3Atrue%7D%2C%22catalog%22%3A%7B%22Product%22%3A%7B%22_id%22%3A%22108096091%22%2C%22categories%22%3A%5B%7B%22type%22%3A%22c%22%2C%22_id%22%3A%22audio_and_headphones%7Cheadphones%7Cnoise-cancelling_headphones%22%7D%5D%2C%22name%22%3A%22Bose%20QuietComfort%20%2045%20Over-Ear%20Wireless%20Headphones%20-%20Black%22%2C%22imageUrl%22%3A%22http%3A%2F%2Fwww.thesource.ca%2Fmedias%2F20210827133203-108096091-A.jpg-mediaConversion-640-x-480-0%3Fcontext%3DbWFzdGVyfGltYWdlc3wyMTU0NnxpbWFnZS9qcGVnfGltYWdlcy9oMTkvaDlhLzk0NDY3NzMzMjU4NTQuanBnfDk3MmY2OTljNDA3OGFkMTdiOTRiODAwNjZjMDE4M2Q5MDE2OTU5YTJiNDA4ZTJlZDg3ODUzYzVlOTg2NDU0ZjU%22%2C%22url%22%3A%22https%3A%2F%2Fwww.thesource.ca%2Fen-ca%2Faudio-headphones%2Fheadphones%2Fall-headphones%2Fbose-quietcomfort%25c2%25ae-45-over-ear-wireless-headphones---black%2Fp%2F108096091%22%2C%22price%22%3A389.99%2C%22inventoryCount%22%3A1%2C%22description%22%3A%22Bose%20QuietComfort%C2%AE%2045%20headphones%20-%20wireless%20headphones%20with%20the%20perfect%20balance%20of%20quiet%2C%20comfort%20and%20sound.%22%7D%7D%2C%22consents%22%3A%5B%5D%2C%22account%22%3A%7B%7D%2C%22_toolsEventLinkId%22%3A%224396623577331795%22%7D",
+  "method": "POST",
+  "mode": "cors",
+  "credentials": "include"
+}); -->
