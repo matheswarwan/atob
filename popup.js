@@ -62,7 +62,9 @@ async function init() {
       var tmpDate = new Date(Number(key));
       var dateSince = moment(tmpDate).fromNow();
       var savedUrl = new URL(decodeURIComponent(savedItems[item][key]['url'] ));
-      var encodedString = savedUrl.search.replace('?event=','')
+      // var encodedString = savedUrl.search.replace('?event=','')
+      console.log('Payload - ' , savedItems[item][key]['payload'])
+      var encodedString = btoa(JSON.stringify(savedItems[item][key]['payload']));
 
       var isPayloadAction = (savedItems[item][key]['payload']['action'] ? savedItems[item][key]['payload']['action'] : 'Action Not defined') ;
 
@@ -134,10 +136,6 @@ async function init() {
 
   document.querySelectorAll('.ck-viewEncodedString').forEach(function(item) {
     item.addEventListener('click', function () {
-      //document.getElementsByClassName('ck-viewEncodedString')[0].getAttribute('encodedstring')
-      //navigator.clipboard.writeText(item.getAttribute('encodedstring'));
-      //document.getElementById('atob').innerHTML = "";
-      //document.getElementById('atob').innerHTML = item.getAttribute('encodedstring');
       $('#atob').val(item.getAttribute('encodedstring'));
       console.log(item.getAttribute('encodedstring'))
       var event = new Event('input');
@@ -193,6 +191,10 @@ function generateJsonViewer(jsonObj) {
   setJSON();
 
   jsonViewer.showJSON(jsonObj); //Show all 
+  //Click to copy function 
+  navigator.clipboard.writeText(JSON.stringify(jsonObj));
+  //alert('Copied to clipboard')
+
   // jsonViewer.showJSON(jsonObj, null, 1); //Collapse to level 1  
   //jsonViewer.showJSON(jsonObj, 1); // Show only level 1
 }

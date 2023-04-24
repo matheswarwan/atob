@@ -43,8 +43,43 @@ chrome.webRequest.onBeforeRequest.addListener(
         });
       });
     }
+    else if(request.method == 'POST' 
+    && request.url.indexOf('evergage.com/api2/event/') > -1) 
+  {
+    var url = new URL(decodeURIComponent(request.url));
+    console.log('Post method - get payload ', JSON.parse(request?.requestBody?.formData?.event?.[0]))
+    var decodedJson = JSON.parse(request?.requestBody?.formData?.event?.[0]);
+    var epocheDate = Date.now().toString();
+    var payload = decodedJson;
+    var hostName = url.hostname;
+    hostName = hostName.split('.')[0];
+    var datasetName = url.pathname.split('/')[url.pathname.split('/').length-1]; 
+
+    hostName = hostName + " (ds: " + datasetName + ")"
+
+    var isPayload = {} 
+    isPayload[epocheDate] = {}
+    isPayload[epocheDate]['url'] = request.url;
+    isPayload[epocheDate]['payload'] = payload;
+    isPayload[epocheDate]['datetime'] = Date.now();
+
+    chrome.storage.local.get(null, function(originalPayload){
+      if(Object.keys(originalPayload).includes(hostName)) {
+        originalPayload[hostName].push(isPayload);
+      } else {
+        originalPayload[hostName] = [];
+        originalPayload[hostName].push(isPayload);
+      }
+      chrome.storage.local.set(originalPayload, async function(){
+        //Update icon to show something is saved
+        chrome.action.setIcon({ path:  "../images/activeImg/cloud-48.png" });
+        await delay(CONFIG.RECORD_TIMER);
+        chrome.action.setIcon({ path:  "../images/cloud/cloud-48.png" });
+      });
+    });
+  } //if ends here 
     
   },
   {urls: [ "<all_urls>"]},
-  []
+  ['requestBody']
 ); 

@@ -21,3 +21,6 @@ This addon logs all events that are sent to Salesforce's Marketing Cloud Persona
 7. When an event is recorded, the addon would change color for 5 seconds and it’ll be available in the addon's popup.
 
 <img src="gitImages/2.png" width="200px" height="250px"/>
+
+Note:
+Both 'GET' request with encoded payload & 'POST' request with formData & event payload are supported.
