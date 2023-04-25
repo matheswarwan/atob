@@ -11,10 +11,8 @@
   <script src="./js/bootstrap.bundle.min.js" ></script>
   <script src="./js/moment-with-locales.min.js"></script>
   <script src="./js/json-viewer.js"></script>
-  <!-- <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script> -->
   <style>
     html {
-      height: 800px;
       width: 600px;
       background: #f5f5f5;
     }
@@ -29,6 +27,17 @@
     .ck-item-hide {
       display: none;
     }
+    .ck-decode-textarea{
+      padding-top: 10px; 
+      padding-left: 10px; 
+      padding-right:10px; 
+      border-radius: 5px; 
+      height:36px; 
+      border-color: #CCCCCC; 
+      color: #62798D; 
+      font-size: 16px; 
+      line-height: 24px
+    }
     *.x {
       border: 1px solid;
     }
@@ -36,21 +45,22 @@
 </head>
 <body class="centered-wrapper">
     <!-- centered content to make form in center -->
-    <div class="centered-content">
+    <div class="centered-content" style="padding-left:20px; padding-right: 20px">
       <!-- Refresh and Clear All buttons starts -->
-      <div class="me-4 pb-4 container-fluid">
-        <div class="row pt-2 pb-1">
-          <div class="col-md-12 text-end mt-4">
+      <div class="container-fluid" style="padding-top: 32px">
+        <div class="row">
+          <div class="col-md-12 text-end"> 
             <button
               id="BtnRefresh"
-              class="btn btn-outline-info fw-bold me-3"
-              style="color: #1296ca; border-color: #1296ca"
+              class="btn btn-outline-info fw-bold"
+              style="color: #1296ca; border-color: #1296ca; margin-right: 16px"
             >
-              <i class="bi bi-arrow-clockwise"></i> &nbspRefresh
+              <img style="height:14px; width:14px" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACoAAAAqCAYAAADFw8lbAAAACXBIWXMAACE4AAAhOAFFljFgAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAP3SURBVHgBzVlNbttGFP5mSLluUTSE0gBZ8gaRgMZpd8oJ4p4g8iaF7IXdE1g+QeyFI6Ab2ydIbmB71VZZSD2BuQzQSiCaBDFMcV7eULZiyUNzKMoIP0CAxPnRN2/evHnvo0DJ4B/0vA/no9rVb+FQ+O+Llb5AieC97Hnym6jHX/3rz6UQT10UhLbAxyjyVYSJFSBkKASF3y+7/WCtHlpPtnzugRx/9rFSqjEX0R87bxsQeKYUrf7/KfLH5KamBhHAbai+6gZC4IQfnQ42Vg4xJ3Jt/f39bpMEtjGzNTkQQIjDJbhH71r1YLbR6/zpS3LObowi2pGwgLYgW+aMSR4UIIlkLFH7gqJjveg8AzOJVjtvtxXRMYoRnIWvF32/0z1+2On5NgNSiepDwhMdaAvgjsB+3NDWtSFr9FFNkg+CtmLt1tGEkJd6JBT6MdCHrExOuIuRryiuCSGfaUK4HYHj4tcojsM0HzWe+vfn0csMkvok7wzWbz3FAX9O+LM7PiSyzXZ5ntLXj0d47QjnhFI63LCo9snbtpsJ7g1aK1uYA5enOr+/s0WniD7kiS5Mpk86IxSuXBv89tMbFER1v7vLJtq0HjAbni7GqzVCAU8XQVJjuME7wn+eZ8yE6GVc883d1O/hxkofC8Rw40mbHcl6zi+HSeI5TJ4scDhs/byLnEjcKBar7NSeqV068h5fwTVYwp1MmhJCFCq5tugKF+S+hkwnwiSRB3I8Ka/cBLZmaLiT7UAeFoiEqA7KpkblYA8lQUI05eYIwheLPUBFIHUQNjWQUP+gAAToFAuCcJ2+68L1leG4S8gABTBYf9L0DnpbOEcxX11GGHKVkJrhkyL7EiIF4bgMKTyPhlXiXAakEhVSLDS8FIUcYRSYGgjyHkoEGbZ+CYwtpBooES633pgc+A/+6FrfxXeNMVEyx7w4olWUBAlRKYU5zxRiU9dPKAESov+1Hp8kasZNeB8+RdsoAa6HpyNTB87stxIJ5ytjqmbSagjMWX64JCr1d3OnfMUxFfBZ3ltL6efZCgVZ0D6vK91Cko72VY70aTkoVwHRWfXVX3OVyhoP9ru1RNjgclxLOklpbgmjUqI1oQx1I9DWTxZmAY8JOhKbPGfzJgPRHrYeZ5Y7RqKXym+2pKMJc2gjJU6lq4Io/iLpOCznkKBHnJc2siQd5aKelaSn6qM5yBZF8MO3lXqWMp0p5Fb3/27z9txJLNWxO0ZlzaaAtFKc2WebvH1FlOZpaBVQqJ3hur1ekE8aL0pYEwTtqe+WdsM8LyGQk+gV9E2lSDV5+CPYaahvJMTRiN+S5CWIIkSvgws4z+UXWERcEZCaJDBcIQQjuEG4oNvsMxV/rpQkFq7rAAAAAElFTkSuQmCC" />
+              Refresh
             </button>
             <button
               id="BtnClear"
-              class="btn btn-outline-info me-3"
+              class="btn btn-outline-info"
               style="background-color: #1296ca; color: white"
             >
               Clear All
@@ -61,50 +71,32 @@
       <!-- Refresh and Clear All buttons ends -->
 
       <!-- Site text starts -->
-      <div
-        class="pb-3 fw-bold text-start px-3"
-        style="font-family: Helvetica, Arial, sans-serif"
-      >
-        Sites that sends events to Evergage:
+      <div class="container-fluid">
+        <div class="row">
+          <div
+            class="fw-bold text-start"
+            style="font-family: Helvetica, Arial, sans-serif; padding-top: 40px; padding-bottom: 24px"
+            title="This shows the list of sites that sent events to Evergage servers."
+          >
+            Sites Captured:
+          </div>
+        </div>
       </div>
       <!-- Site text ends -->
-
       <!-- accordion starts -->
-      <div class="container-fluid" id="accordionExample">
-        <!-- <div class="accordion" id="accordionSection">
-          <div class="accordion-item mb-3">
-            <h2 class="accordion-header">
-              <button
-                type="button"
-                class="accordion-button collapsed"
-                data-bs-toggle="collapse"
-                data-bs-target="#collapseOne"
-              >
-                the source.us-1.evergage.com
-              </button>
-            </h2>
-            <div
-              class="accordion-collapse collapse"
-              id="collapseOne"
-              data-bs-parent="#accordionSection"
-            >
-              <div class="accordion-body text-start">
-                1) 13 Minutes ago (Action: homepage) <a href="#">view</a>
-              </div>
-            </div>
-          </div>
-        </div> -->
+      <div class="container-fluid" id="accordionExample" style="padding-bottom: 24px">
       </div>
       <!-- accordion ends -->
-
+      <hr>
+            
       <!-- Decode text starts-->
       <div class="container-fluid">
         <div class="row">
           <div
-            class="pt-2 fw-bold text-start px-3 pb-3"
-            style="font-family: Helvetica, Arial, sans-serif"
+            class="fw-bold text-start"
+            style="font-family: Helvetica, Arial, sans-serif; padding-top:24px; padding-bottom: 24px"
           >
-            Decode the encoded string below:
+            Decode: 
           </div>
         </div>
       </div>
@@ -112,13 +104,13 @@
 
       <!-- textarea starts -->
       <div class="container-fluid">
-        <div class="row">
+        <div class="row" style=" padding-bottom:32px">
           <div class="form-floating">
             <textarea
               name="atob" id="atob"
-              class="w-100 h-75"
-              style="border-radius: 5px"
-              placeholder="Enter encoded string "
+              class="w-100 h-75 ck-decode-textarea"
+              style=""
+              placeholder="Enter encoded string"
             ></textarea>
           </div>
         </div>
@@ -126,6 +118,39 @@
       <!-- textarea ends -->
 
       <!-- json format container starts -->
+      <!-- <div class="container-fluid">
+        <div class="row" style="">
+          <img
+            id="jsonImg"
+            style="object-fit: cover;"
+            src = './images/ui/json_preview.png'
+          />
+          <div
+            class="json overflow-scroll mt-4 ps-lg-4 p-3"
+            id="json" 
+            rows="1"
+            style="
+              background-color: #d9d9d9;
+              width: 100%;
+              height: 100%;
+              text-align: start;
+              background-image: url('./images/ui/json_preview.png')
+            "
+            hidden
+          >
+          </div> 
+        </div>
+      </div> -->
+      <!-- json format container ends -->
+    </div>
+
+    <!-- Json format container - starts -->
+    <div>
+      <img
+      id="jsonImg"
+      style="object-fit: cover;"
+      src = './images/ui/json_preview.png'
+      />
       <div
         class="json overflow-scroll mt-4 ps-lg-4 p-3"
         id="json" 
@@ -135,12 +160,13 @@
           width: 100%;
           height: 100%;
           text-align: start;
+          background-image: url('./images/ui/json_preview.png')
         "
+        hidden
       >
-      Decoded Payload will appear here!
-      </div>
-      <!-- json format container ends -->
+      </div> 
     </div>
+    <!-- Json format container - ends -->
 
   <script src="popup.js"></script>
 </body>

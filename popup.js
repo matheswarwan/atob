@@ -28,7 +28,9 @@ async function getData() {
 async function init() {
 
   //Reset UI
-  document.getElementById('json').innerHTML = 'Decoded Payload will appear here!';
+  document.getElementById('jsonImg').hidden = false;
+  document.getElementById('json').hidden = true; 
+  document.getElementById('json').innerHTML = '';
   document.getElementById('atob').value = '';
 
   var o = await getData();
@@ -66,15 +68,16 @@ async function init() {
       console.log('Payload - ' , savedItems[item][key]['payload'])
       var encodedString = btoa(JSON.stringify(savedItems[item][key]['payload']));
 
-      var isPayloadAction = (savedItems[item][key]['payload']['action'] ? savedItems[item][key]['payload']['action'] : 'Action Not defined') ;
+      //var isPayloadAction = (savedItems[item][key]['payload']['action'] ? savedItems[item][key]['payload']['action'] : 'Action Not defined') ;
 
       var itemClass = (htmlBulletCounter <= 5 ? 'ck-item-show':'ck-item-hide');
-      tableItems += `<div class="${itemClass} ck-itemNumber-${htmlBulletCounter} accordion-body text-start" style="padding-top: 0px !important; padding-bottom: 0px !important" >${htmlBulletCounter}) ${dateSince} (Action: ${isPayloadAction})<button type="button" class="btn btn-link ck-viewEncodedString" encodedString="${encodedString}" accordionId="${'collapse_'+itemNumber}">View</div>`;
+      tableItems += `<div class="${itemClass} ck-itemNumber-${htmlBulletCounter} accordion-body text-start" style="padding-top: 0px !important; padding-bottom: 0px !important" >${htmlBulletCounter}) ${dateSince} <a class="btn btn-link ck-viewEncodedString" encodedString="${encodedString}" accordionId="${'collapse_'+itemNumber}" href="#json">View</a></div>`;
+      // tableItems += `<div class="${itemClass} ck-itemNumber-${htmlBulletCounter} accordion-body text-start" style="padding-top: 0px !important; padding-bottom: 0px !important" >${htmlBulletCounter}) ${dateSince} (Action: ${isPayloadAction})<button type="button" class="btn btn-link ck-viewEncodedString" encodedString="${encodedString}" accordionId="${'collapse_'+itemNumber}">View</div>`;
 
       htmlBulletCounter++;
     }
 
-    var showMoreDiv = `<a class="ck-showMore">Show All</a>`;
+    var showMoreDiv = `<a class="ck-showMore" id="ck-showMore">Show All</a>`;
     showMoreDiv = (savedItems.length > 5 ? showMoreDiv : '');
     var tmpHtml  = `
       <div class="accordion" id="heading_${itemNumber}">
@@ -142,15 +145,18 @@ async function init() {
       document.getElementById('atob').dispatchEvent(event);
       //alert('copied to clipboard')
 
-      // hide accordion 
+      // hide accordion by simulating click action 
+      var event = new Event('click');
       var accordionId = $(this).attr('accordionId');
-      console.log(accordionId);
-      $('#'+accordionId).removeClass('show');
+      console.log('Dispatch click event to accordionId ' , accordionId);
+      document.getElementById('atob').dispatchEvent(event);
+      //$('#'+accordionId).removeClass('show');
       //$('button[data-bs-target="#collapse_0"]').removeClass('collapsed');
 
     });
   });
 
+  $('.ck-item-show').tooltip({show: {effect:"none", delay:0 }});
 
 }
 
@@ -170,6 +176,9 @@ init();
 function generateJsonViewer(jsonObj) { 
   //var jsonObj = {};
   var jsonViewer = new JSONViewer();
+
+  document.querySelector("#json").hidden = false; 
+  document.querySelector("#jsonImg").hidden = true; 
   document.querySelector("#json").innerHTML = '';
   document.querySelector("#json").appendChild(jsonViewer.getContainer());
 
