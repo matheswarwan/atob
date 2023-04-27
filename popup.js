@@ -71,15 +71,15 @@ async function init() {
       var itemClass = (htmlBulletCounter <= 5 ? 'ck-item-show':'ck-item-hide');
       tableItems += `<div class="${itemClass} ck-itemNumber-${htmlBulletCounter} accordion-body text-start" style="padding-top: 0px !important; padding-bottom: 0px !important" >${htmlBulletCounter}) 
       ${dateSince}
-      <sup>
-        <span
-            data-bs-original-title="${tmpDate}"
-            data-toggle="tooltip" 
-            data-placement="right"
-            >
-            ?
-        </span>
-      </sup>
+      <span
+          title="${tmpDate}"
+          data-bs-original-title="${tmpDate}"
+          data-toggle="tooltip" 
+          data-placement="right"
+          data-trigger="hover"
+          >
+          <sup>?</sup>
+      </span>
       <a class="btn btn-link ck-viewEncodedString" encodedString="${encodedString}" accordionId="${'collapse_'+itemNumber}" href="#json">View Payload</a></div>`;
       htmlBulletCounter++;
     }
