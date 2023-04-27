@@ -1,3 +1,6 @@
+//Global Variable
+var jsonToClipboard = '';
+
 document.getElementById('BtnRefresh').addEventListener('click', init);
 document.getElementById('BtnClear').addEventListener('click', clearAll);
 
@@ -11,8 +14,7 @@ txtAreaField.addEventListener('input', function() {
 
     generateJsonViewer(decodedJson);
   }catch(e) {
-    var errorDiv = 
-    $('#json').empty().html('<font color="red">Error: Invalid Base64 text</font>')
+    var errorDiv =  $('#json').empty().html('<font color="red">Error: Invalid Base64 text</font>')
   }
 });
 
@@ -30,6 +32,7 @@ async function init() {
   //Reset UI
   document.getElementById('jsonImg').hidden = false;
   document.getElementById('json').hidden = true; 
+  document.getElementById('bd-clipboard').hidden = true; 
   document.getElementById('json').innerHTML = '';
   document.getElementById('atob').value = '';
 
@@ -64,16 +67,20 @@ async function init() {
       var tmpDate = new Date(Number(key));
       var dateSince = moment(tmpDate).fromNow();
       var savedUrl = new URL(decodeURIComponent(savedItems[item][key]['url'] ));
-      // var encodedString = savedUrl.search.replace('?event=','')
-      console.log('Payload - ' , savedItems[item][key]['payload'])
       var encodedString = btoa(JSON.stringify(savedItems[item][key]['payload']));
-
-      //var isPayloadAction = (savedItems[item][key]['payload']['action'] ? savedItems[item][key]['payload']['action'] : 'Action Not defined') ;
-
       var itemClass = (htmlBulletCounter <= 5 ? 'ck-item-show':'ck-item-hide');
-      tableItems += `<div class="${itemClass} ck-itemNumber-${htmlBulletCounter} accordion-body text-start" style="padding-top: 0px !important; padding-bottom: 0px !important" >${htmlBulletCounter}) ${dateSince} <a class="btn btn-link ck-viewEncodedString" encodedString="${encodedString}" accordionId="${'collapse_'+itemNumber}" href="#json">View</a></div>`;
-      // tableItems += `<div class="${itemClass} ck-itemNumber-${htmlBulletCounter} accordion-body text-start" style="padding-top: 0px !important; padding-bottom: 0px !important" >${htmlBulletCounter}) ${dateSince} (Action: ${isPayloadAction})<button type="button" class="btn btn-link ck-viewEncodedString" encodedString="${encodedString}" accordionId="${'collapse_'+itemNumber}">View</div>`;
-
+      tableItems += `<div class="${itemClass} ck-itemNumber-${htmlBulletCounter} accordion-body text-start" style="padding-top: 0px !important; padding-bottom: 0px !important" >${htmlBulletCounter}) 
+      ${dateSince}
+      <sup>
+        <span
+            data-bs-original-title="${tmpDate}"
+            data-toggle="tooltip" 
+            data-placement="right"
+            >
+            ?
+        </span>
+      </sup>
+      <a class="btn btn-link ck-viewEncodedString" encodedString="${encodedString}" accordionId="${'collapse_'+itemNumber}" href="#json">View Payload</a></div>`;
       htmlBulletCounter++;
     }
 
@@ -113,12 +120,6 @@ async function init() {
     return accordionHtml;
   }
 
-  function generateAccordianItemsWithPagination(itemNumber, hostName, pageNumber) {
-    // pageNumber - current page Number * 5 gives the elements to show
-    // TODO: Work on pagingation
-  }
-
-  //Add click to Copy functionality
   document.querySelectorAll('.ck-showMore').forEach(function(item){
     item.addEventListener('click', function(){
       $('.ck-item-hide').addClass('ck-item-show').removeClass('ck-item-hide');
@@ -127,36 +128,27 @@ async function init() {
   });
 
   document.querySelectorAll('.ck-encodedString').forEach(function(item) {
-    // console.log(item)
     item.addEventListener('click', function () {
       navigator.clipboard.writeText(item.innerHTML);
       document.getElementById('atob').innerHTML = item.innerHTML;
       var event = new Event('input');
       document.getElementById('atob').dispatchEvent(event);
-      //alert('copied to clipboard')
     });
   });
 
   document.querySelectorAll('.ck-viewEncodedString').forEach(function(item) {
     item.addEventListener('click', function () {
       $('#atob').val(item.getAttribute('encodedstring'));
-      console.log(item.getAttribute('encodedstring'))
       var event = new Event('input');
       document.getElementById('atob').dispatchEvent(event);
-      //alert('copied to clipboard')
-
       // hide accordion by simulating click action 
       var event = new Event('click');
       var accordionId = $(this).attr('accordionId');
-      console.log('Dispatch click event to accordionId ' , accordionId);
       document.getElementById('atob').dispatchEvent(event);
-      //$('#'+accordionId).removeClass('show');
-      //$('button[data-bs-target="#collapse_0"]').removeClass('collapsed');
-
     });
   });
 
-  $('.ck-item-show').tooltip({show: {effect:"none", delay:0 }});
+  //$('.ck-item-show').tooltip({show: {effect:"none", delay:0 }});
 
 }
 
@@ -174,10 +166,11 @@ init();
 
 //Json viewer 
 function generateJsonViewer(jsonObj) { 
-  //var jsonObj = {};
+  jsonToClipboard = jsonObj;
   var jsonViewer = new JSONViewer();
 
   document.querySelector("#json").hidden = false; 
+  document.querySelector('#bd-clipboard').hidden = false;
   document.querySelector("#jsonImg").hidden = true; 
   document.querySelector("#json").innerHTML = '';
   document.querySelector("#json").appendChild(jsonViewer.getContainer());
@@ -187,9 +180,7 @@ function generateJsonViewer(jsonObj) {
   var setJSON = function() {
     try {
       // var value = textarea.value;
-      // // console.log('value in generate json viewer ', value)
       // jsonObj = JSON.parse(value);
-      // console.log('jsonObj in generate json viewer ', jsonObj)
     }
     catch (err) {
       alert(err);
@@ -200,10 +191,23 @@ function generateJsonViewer(jsonObj) {
   setJSON();
 
   jsonViewer.showJSON(jsonObj); //Show all 
-  //Click to copy function 
-  navigator.clipboard.writeText(JSON.stringify(jsonObj));
-  //alert('Copied to clipboard')
-
   // jsonViewer.showJSON(jsonObj, null, 1); //Collapse to level 1  
-  //jsonViewer.showJSON(jsonObj, 1); // Show only level 1
+  // jsonViewer.showJSON(jsonObj, 1); // Show only level 1
 }
+
+// https://getbootstrap.com/docs/4.0/components/tooltips/#methods
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+
+
+$('.btn-clipboard').on('click', function() { 
+  $(".btn-clipboard-tooltip-span").attr('data-bs-original-title', 'Copied!')
+  //.tooltip('fixTitle')
+  .tooltip('show');
+
+  navigator.clipboard.writeText(JSON.stringify(jsonToClipboard));
+});
+$('.btn-clipboard').on('mouseover', function() { 
+  $(".btn-clipboard-tooltip-span").attr('data-bs-original-title', 'Copy to clipboard!');
+});
