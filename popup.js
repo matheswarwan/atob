@@ -78,9 +78,9 @@ async function init() {
           data-placement="right"
           data-trigger="hover"
           >
-          <sup>?</sup>
+          <sup><img height="12px" width="12px" src="./images/clock.png"/></sup>
       </span>
-      <a class="btn btn-link ck-viewEncodedString" encodedString="${encodedString}" accordionId="${'collapse_'+itemNumber}" href="#json">View Payload</a></div>`;
+      <a class="btn btn-link ck-viewEncodedString" encodedString="${encodedString}" accordionId="${'collapse_'+itemNumber}" href="#json">View</a></div>`;
       htmlBulletCounter++;
     }
 
