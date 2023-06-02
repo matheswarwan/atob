@@ -1,11 +1,10 @@
 {
-  "update_url": "https://clients2.google.com/service/update2/crx",
   "manifest_version": 3,
   "name": "Interaction Studio (MCP) Logger",
-  "description": "Logs & Stores all Interaction Studio (MCP) events in local storage and converts base64 string to readable JSON",
-  "version": "0.0.0.7",
+  "description": "This add-on logs all Interaction Studio events that are sent to Salesforce's Marketing Cloud Personalization server and stores the event details in local storage. As the payload is base64 encoded, the add-on decodes and displays formatted JSON content to make it easier for developers and testers to review and debug code.",
+  "version": "0.0.1.0",
   "author": "mathes.btech@gmail.com",
-  "version_name": "0.0.0.7",
+  "version_name": "0.0.1.0",
   "icons": {
     "16": "/images/cloud/cloud-16.png",
     "32": "/images/cloud/cloud-32.png",
@@ -14,37 +13,41 @@
   },
   "web_accessible_resources": [
     {
-      "resources": [  
+      "resources": [
         "css/bootstrap.min.css",
+        "css/bootstrap4-toggle.css",
         "css/json-viewer.css",
         "js/jquery-3.6.3.js",
         "js/popper.min.js",
         "js/bootstrap.bundle.min.js",
+        "js/bootstrap4-toggle.min.js",
         "js/json-viewer.js",
         "js/clipboard.min.js",
         "js/moment-with-locales.min.js",
         "images/activeImg/cloud-48.png"
-    ],
-      "matches": [ "<all_urls>" ]
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
-   
   ],
   "content_security_policy": {
     "script-src": "self",
     "object-src": "self"
- },
- "background": {
-  "service_worker": "js/background.js"
+  },
+  "background": {
+    "service_worker": "js/background.js"
   },
   "action": {
     "default_popup": "popup.html"
   },
-  "permissions":[
+  "permissions": [
     "storage",
     "webRequest",
-    "unlimitedStorage"
+    "unlimitedStorage",
+    "declarativeNetRequest"
   ],
-  "host_permissions" : [
+  "host_permissions": [
     "<all_urls>"
   ]
 }
