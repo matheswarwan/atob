@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Interaction Studio (MCP) Logger",
-  "description": "This add-on logs all Interaction Studio events that are sent to Salesforce's Marketing Cloud Personalization server and stores the event details in local storage. As the payload is base64 encoded, the add-on decodes and displays formatted JSON content to make it easier for developers and testers to review and debug code.",
+  "description": "This add-on logs all events that are sent to Salesforce's Marketing Cloud Personalization server and stores it in local storage.",
   "version": "0.0.1.0",
   "author": "mathes.btech@gmail.com",
   "version_name": "0.0.1.0",
@@ -42,12 +42,25 @@
     "default_popup": "popup.html"
   },
   "permissions": [
+    "scripting",
     "storage",
     "webRequest",
     "unlimitedStorage",
-    "declarativeNetRequest"
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
+    "declarativeNetRequestFeedback"
   ],
   "host_permissions": [
     "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+        "matches": [
+            "<all_urls>"
+        ],
+        "js": [
+            "js/contentScript.js"
+        ]
+    }
   ]
 }

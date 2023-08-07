@@ -77,8 +77,10 @@ async function init() {
       // const data = encoder.encode(str);
       // const encodedString = btoa(String.fromCharCode.apply(null, data));
 
+      var responseStatusAlertCSS = (savedItems[item][key]["statusCode"] >= 200 && savedItems[item][key]["statusCode"] < 400 ? 'alert alert-success': 'alert alert-danger')
+
       var itemClass = htmlBulletCounter <= 5 ? "ck-item-show" : "ck-item-hide";
-      tableItems += `<div class="${itemClass} ck-itemNumber-${htmlBulletCounter} accordion-body text-start" style="padding-top: 0px !important; padding-bottom: 0px !important" >${htmlBulletCounter}) 
+      tableItems += `<div class="${itemClass} ck-itemNumber-${htmlBulletCounter} accordion-body ${responseStatusAlertCSS} text-start" style="padding-top: 0px !important; padding-bottom: 0px !important" >${htmlBulletCounter}) 
       ${dateSince}
       <span
           title="${tmpDate}"
