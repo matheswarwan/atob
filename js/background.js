@@ -1,264 +1,195 @@
 console.log("Background js loaded..");
-let CONFIG = {};
-CONFIG.RECORD_TIMER = 1.5 * 1000;
+
+const CONFIG = {
+  RECORD_TIMER: 1.5 * 1000,
+};
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
-// chrome.webRequest.onBeforeRequest.addListener(
-//   function (request) {
-//     // https://cdn.evgnet.com/beacon/adpinc/prod/scripts/evergage.min.js
-//     if (
-//       request.method == "GET" &&
-//       request.url.indexOf("evergage.com/api2/event/") > -1
-//     ) {
-//       console.log("GET Request ", request);
-//       var url = new URL(decodeURIComponent(request.url));
-//       var encodedString = url.search.replace("?event=", "");
-//       var decodedString = atob(encodedString);
-//       var decodedJson = JSON.parse(decodedString);
-//       var epocheDate = Date.now().toString();
-//       var payload = decodedJson;
-//       var hostName = url.hostname;
-//       hostName = hostName.split(".")[0];
-//       var datasetName =
-//         url.pathname.split("/")[url.pathname.split("/").length - 1];
-//       var initiator = request?.initiator;
-//       var websiteName = new URL(initiator).hostname;
-//       console.log("WEbsiteName ", websiteName);
+/** Serialize storage writes so concurrent events cannot overwrite each other. */
+let storageWriteQueue = Promise.resolve();
 
-//       hostName = websiteName + " | " + hostName + " (ds: " + datasetName + ")";
+/** requestId -> pending event data captured in onBeforeRequest */
+const pendingRequests = new Map();
 
-//       var isPayload = {};
-//       isPayload[epocheDate] = {};
-//       isPayload[epocheDate]["url"] = request.url;
-//       isPayload[epocheDate]["payload"] = payload;
-//       isPayload[epocheDate]["datetime"] = Date.now();
-//       isPayload[epocheDate]["website"] = websiteName;
-
-//       chrome.storage.local.get(null, function (originalPayload) {
-//         if (Object.keys(originalPayload).includes(hostName)) {
-//           originalPayload[hostName].push(isPayload);
-//         } else {
-//           originalPayload[hostName] = [];
-//           originalPayload[hostName].push(isPayload);
-//         }
-//         chrome.storage.local.set(originalPayload, async function () {
-//           //Update icon to show something is saved
-//           chrome.action.setIcon({ path: "../images/activeImg/cloud-48.png" });
-//           await delay(CONFIG.RECORD_TIMER);
-//           chrome.action.setIcon({ path: "../images/cloud/cloud-48.png" });
-//         });
-//       });
-//     } else if (
-//       request.method == "POST" &&
-//       request.url.indexOf("evergage.com/api2/event/") > -1
-//     ) {
-//       console.log("POST Request ", request);
-//       var url = new URL(decodeURIComponent(request.url));
-//       console.log(
-//         "Post method - get payload ",
-//         JSON.parse(request?.requestBody?.formData?.event?.[0])
-//       );
-//       var decodedJson = JSON.parse(request?.requestBody?.formData?.event?.[0]);
-//       var epocheDate = Date.now().toString();
-//       var payload = decodedJson;
-//       var hostName = url.hostname;
-//       hostName = hostName.split(".")[0];
-//       var datasetName =
-//         url.pathname.split("/")[url.pathname.split("/").length - 1];
-//       var initiator = request?.initiator;
-//       var websiteName = new URL(initiator).hostname;
-//       console.log("WEbsiteName ", websiteName);
-
-//       hostName = websiteName + " | " + hostName + " (ds: " + datasetName + ")";
-
-//       var isPayload = {};
-//       isPayload[epocheDate] = {};
-//       isPayload[epocheDate]["url"] = request.url;
-//       isPayload[epocheDate]["payload"] = payload;
-//       isPayload[epocheDate]["datetime"] = Date.now();
-//       isPayload[epocheDate]["website"] = websiteName;
-
-//       chrome.storage.local.get(null, function (originalPayload) {
-//         if (Object.keys(originalPayload).includes(hostName)) {
-//           originalPayload[hostName].push(isPayload);
-//         } else {
-//           originalPayload[hostName] = [];
-//           originalPayload[hostName].push(isPayload);
-//         }
-//         chrome.storage.local.set(originalPayload, async function () {
-//           //Update icon to show something is saved
-//           chrome.action.setIcon({ path: "../images/activeImg/cloud-48.png" });
-//           await delay(CONFIG.RECORD_TIMER);
-//           chrome.action.setIcon({ path: "../images/cloud/cloud-48.png" });
-//         });
-//       });
-//     } //if ends here
-//   },
-//   { urls: ["<all_urls>"] },
-//   ["requestBody"]
-// );
-
-
-
-// Dev - starts
-/* var callback = function(request) {
-  // console.log('******Les Headers ont ete recus - check for response request************');
-  // console.log(request);
-
-  if (
-    request.method == "GET" &&
+function isEvergageEventRequest(request) {
+  return (
+    (request.method === "GET" || request.method === "POST") &&
+    typeof request.url === "string" &&
     request.url.indexOf("evergage.com/api2/event/") > -1
-  ) {
-    console.log("GET Request ", request);
-    console.log("GET Request status", request.statusCode);
-  } else if (
-    request.method == "POST" &&
-    request.url.indexOf("evergage.com/api2/event/") > -1
-  ) {
-    console.log("POST Request ", request);
-    console.log("POST Request status", request.statusCode);
-  } //if ends here
-}; */
-var callback = function (request) {
-  // https://cdn.evgnet.com/beacon/adpinc/prod/scripts/evergage.min.js
-  if (
-    request.method == "GET" &&
-    request.url.indexOf("evergage.com/api2/event/") > -1
-  ) {
-    console.log("GET Request ", request);
-    console.log("GET Request status", request.statusCode);
-    var url = new URL(decodeURIComponent(request.url));
-    var encodedString = url.search.replace("?event=", "");
-    var decodedString = atob(encodedString);
-    var decodedJson = JSON.parse(decodedString);
-    var epocheDate = Date.now().toString();
-    var payload = decodedJson;
-    var statusCode = request.statusCode;
-    var hostName = url.hostname;
-    hostName = hostName.split(".")[0];
-    var datasetName =
-      url.pathname.split("/")[url.pathname.split("/").length - 1];
-    var initiator = request?.initiator;
-    var websiteName = new URL(initiator).hostname;
-    console.log("WEbsiteName ", websiteName);
-
-    hostName = websiteName + " | " + hostName + " (ds: " + datasetName + ")";
-
-    var isPayload = {};
-    isPayload[epocheDate] = {};
-    isPayload[epocheDate]["url"] = request.url;
-    isPayload[epocheDate]["payload"] = payload;
-    isPayload[epocheDate]["datetime"] = Date.now();
-    isPayload[epocheDate]["website"] = websiteName;
-    isPayload[epocheDate]["statusCode"] = statusCode;
-
-    chrome.storage.local.get(null, function (originalPayload) {
-      if (Object.keys(originalPayload).includes(hostName)) {
-        originalPayload[hostName].push(isPayload);
-      } else {
-        originalPayload[hostName] = [];
-        originalPayload[hostName].push(isPayload);
-      }
-      chrome.storage.local.set(originalPayload, async function () {
-        //Update icon to show something is saved
-        chrome.action.setIcon({ path: "../images/activeImg/cloud-48.png" });
-        await delay(CONFIG.RECORD_TIMER);
-        chrome.action.setIcon({ path: "../images/cloud/cloud-48.png" });
-      });
-    });
-  } else if (
-    request.method == "POST" &&
-    request.url.indexOf("evergage.com/api2/event/") > -1
-  ) {
-    console.log("POST Request ", request);
-    console.log("POST Request status", request.statusCode);
-
-    var url = new URL(decodeURIComponent(request.url));
-    console.log(
-      "Post method - get payload ",
-      JSON.parse(request?.requestBody?.formData?.event?.[0])
-    );
-    var decodedJson = JSON.parse(request?.requestBody?.formData?.event?.[0]);
-    var epocheDate = Date.now().toString();
-    var payload = decodedJson;
-    var statusCode = request.statusCode;
-    var hostName = url.hostname;
-    hostName = hostName.split(".")[0];
-    var datasetName =
-      url.pathname.split("/")[url.pathname.split("/").length - 1];
-    var initiator = request?.initiator;
-    var websiteName = new URL(initiator).hostname;
-    console.log("WEbsiteName ", websiteName);
-
-    hostName = websiteName + " | " + hostName + " (ds: " + datasetName + ")";
-
-    var isPayload = {};
-    isPayload[epocheDate] = {};
-    isPayload[epocheDate]["url"] = request.url;
-    isPayload[epocheDate]["payload"] = payload;
-    isPayload[epocheDate]["datetime"] = Date.now();
-    isPayload[epocheDate]["website"] = websiteName;
-    isPayload[epocheDate]["statusCode;"] = statusCode;
-
-    chrome.storage.local.get(null, function (originalPayload) {
-      if (Object.keys(originalPayload).includes(hostName)) {
-        originalPayload[hostName].push(isPayload);
-      } else {
-        originalPayload[hostName] = [];
-        originalPayload[hostName].push(isPayload);
-      }
-      chrome.storage.local.set(originalPayload, async function () {
-        //Update icon to show something is saved
-        chrome.action.setIcon({ path: "../images/activeImg/cloud-48.png" });
-        await delay(CONFIG.RECORD_TIMER);
-        chrome.action.setIcon({ path: "../images/cloud/cloud-48.png" });
-      });
-    });
-  } //if ends here
+  );
 }
-var filter = { urls: ['<all_urls>']
-};
-var opt_extraInfoSpec = ['responseHeaders'];
 
-chrome.webRequest.onHeadersReceived.addListener(
-  callback, filter, opt_extraInfoSpec
+function decodeBase64Utf8(encodedString) {
+  const binary = atob(encodedString);
+  const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+function extractPayload(request) {
+  if (request.method === "GET") {
+    const url = new URL(request.url);
+    // searchParams.get already URL-decodes the value
+    const encodedString = url.searchParams.get("event");
+    if (!encodedString) {
+      throw new Error("Missing event query parameter");
+    }
+    return JSON.parse(decodeBase64Utf8(encodedString));
+  }
+
+  const formEvent = request.requestBody?.formData?.event?.[0];
+  if (formEvent) {
+    // formData event may be raw JSON or base64 depending on beacon version
+    try {
+      return JSON.parse(formEvent);
+    } catch (_) {
+      return JSON.parse(decodeBase64Utf8(formEvent));
+    }
+  }
+
+  const rawBytes = request.requestBody?.raw?.[0]?.bytes;
+  if (rawBytes) {
+    const rawText = new TextDecoder().decode(new Uint8Array(rawBytes));
+    try {
+      return JSON.parse(rawText);
+    } catch (_) {
+      // application/x-www-form-urlencoded: event=<payload>
+      const params = new URLSearchParams(rawText);
+      const eventValue = params.get("event");
+      if (!eventValue) {
+        throw new Error("Missing event field in POST body");
+      }
+      try {
+        return JSON.parse(eventValue);
+      } catch (_) {
+        return JSON.parse(decodeBase64Utf8(eventValue));
+      }
+    }
+  }
+
+  throw new Error("Unable to extract Evergage event payload from request");
+}
+
+function getWebsiteName(request) {
+  if (request.initiator) {
+    try {
+      return new URL(request.initiator).hostname;
+    } catch (_) {
+      // fall through
+    }
+  }
+  if (request.documentUrl) {
+    try {
+      return new URL(request.documentUrl).hostname;
+    } catch (_) {
+      // fall through
+    }
+  }
+  return "unknown";
+}
+
+function buildHostKey(request, websiteName) {
+  const url = new URL(request.url);
+  const evergageHost = url.hostname.split(".")[0];
+  const pathParts = url.pathname.split("/").filter(Boolean);
+  const datasetName = pathParts[pathParts.length - 1] || "unknown";
+  return websiteName + " | " + evergageHost + " (ds: " + datasetName + ")";
+}
+
+function saveEvent(request, payload, statusCode) {
+  const websiteName = getWebsiteName(request);
+  const hostName = buildHostKey(request, websiteName);
+  const epocheDate = Date.now().toString();
+
+  const isPayload = {};
+  isPayload[epocheDate] = {
+    url: request.url,
+    payload: payload,
+    datetime: Date.now(),
+    website: websiteName,
+    statusCode: statusCode,
+  };
+
+  storageWriteQueue = storageWriteQueue
+    .then(
+      () =>
+        new Promise((resolve) => {
+          chrome.storage.local.get(null, function (originalPayload) {
+            if (Object.keys(originalPayload).includes(hostName)) {
+              originalPayload[hostName].push(isPayload);
+            } else {
+              originalPayload[hostName] = [isPayload];
+            }
+            chrome.storage.local.set(originalPayload, async function () {
+              try {
+                chrome.action.setIcon({
+                  path: "../images/activeImg/cloud-48.png",
+                });
+                await delay(CONFIG.RECORD_TIMER);
+                chrome.action.setIcon({ path: "../images/cloud/cloud-48.png" });
+              } catch (e) {
+                console.warn("Failed to update action icon", e);
+              }
+              resolve();
+            });
+          });
+        })
+    )
+    .catch((e) => {
+      console.error("Failed to persist Evergage event", e);
+    });
+}
+
+function finalizeRequest(requestId, statusCode) {
+  const pending = pendingRequests.get(requestId);
+  if (!pending) {
+    return;
+  }
+  pendingRequests.delete(requestId);
+  saveEvent(pending.request, pending.payload, statusCode);
+}
+
+chrome.webRequest.onBeforeRequest.addListener(
+  function (request) {
+    if (!isEvergageEventRequest(request)) {
+      return;
+    }
+    try {
+      const payload = extractPayload(request);
+      pendingRequests.set(request.requestId, {
+        request: {
+          url: request.url,
+          method: request.method,
+          initiator: request.initiator,
+          documentUrl: request.documentUrl,
+        },
+        payload: payload,
+      });
+    } catch (e) {
+      console.error("Failed to parse Evergage event request", request.url, e);
+    }
+  },
+  { urls: ["<all_urls>"] },
+  ["requestBody"]
 );
-// Dev - ends
-// // Enable if switched on
 
-// const HEADERS_TO_STRIP_LOWERCASE = [
-//   "content-security-policy",
-//   "x-frame-options",
-// ];
+chrome.webRequest.onCompleted.addListener(
+  function (request) {
+    if (!isEvergageEventRequest(request)) {
+      return;
+    }
+    finalizeRequest(request.requestId, request.statusCode);
+  },
+  { urls: ["<all_urls>"] }
+);
 
-// chrome.webRequest.onBeforeRequest.addListener(
-//   (details) => {
-//     console.log("Removing headers for ", details);
-//     ({
-//       responseHeaders: details.responseHeaders.filter(
-//         (header) =>
-//           !HEADERS_TO_STRIP_LOWERCASE.includes(header.name.toLowerCase())
-//       ),
-//     });
-//   },
-//   {
-//     urls: ["<all_urls>"],
-//   },
-//   ["blocking", "responseHeaders", "extraHeaders"]
-// );
-
-// const HEADERS_TO_STRIP_LOWERCASE = [
-//   'content-security-policy',
-//   'x-frame-options',
-// ];
-
-// chrome.webRequest.onHeadersReceived.addListener(
-//   details => ({
-//     responseHeaders: details.responseHeaders.filter(header =>
-//         !HEADERS_TO_STRIP_LOWERCASE.includes(header.name.toLowerCase()))
-//   }),
-//   {
-//     urls: ['<all_urls>']
-//   },
-//   ['blocking', 'responseHeaders', 'extraHeaders']);
+chrome.webRequest.onErrorOccurred.addListener(
+  function (request) {
+    if (!isEvergageEventRequest(request)) {
+      return;
+    }
+    // Still record the attempt; statusCode null marks transport failure in UI.
+    finalizeRequest(request.requestId, null);
+  },
+  { urls: ["<all_urls>"] }
+);

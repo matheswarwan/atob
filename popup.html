@@ -112,12 +112,12 @@
       <!-- Refresh and Clear All buttons starts -->
       <div class="container-fluid" style="padding-top: 32px">
         <div class="row align-items-center">
-          <div class="col-6">
+          <div class="col-4">
             <a href="https://www.cloudkettle.com/" target="_blank">
               <img style="max-height: 40px" src="./images/is_logo.png" />
             </a>
           </div>
-          <div class="col-6 text-end">
+          <div class="col-8 text-end">
             <!-- <input
               type="checkbox"
               name="toggleXFrame"
@@ -128,9 +128,17 @@
             /> -->
 
             <button
+              id="BtnFullScreen"
+              class="btn btn-outline-info fw-bold"
+              style="color: #1296ca; border-color: #1296ca; margin-right: 12px"
+              title="Open full-screen event explorer"
+            >
+              Full Screen
+            </button>
+            <button
               id="BtnRefresh"
               class="btn btn-outline-info fw-bold"
-              style="color: #1296ca; border-color: #1296ca; margin-right: 16px"
+              style="color: #1296ca; border-color: #1296ca; margin-right: 12px"
             >
               <img
                 style="height: 14px; width: 14px"
@@ -164,10 +172,9 @@
             Sites Captured:
             <span
               title="This shows the list of sites that sent events to Evergage servers."
-              data-bs-original-title="This shows the list of sites that sent events to Evergage servers."
-              data-toggle="tooltip"
-              data-placement="right"
-              data-trigger="hover"
+              data-bs-title="This shows the list of sites that sent events to Evergage servers."
+              data-bs-toggle="tooltip"
+              data-bs-placement="right"
             >
               <sup>?</sup>
             </span>
@@ -177,7 +184,7 @@
       <!-- Site text ends -->
       <!-- accordion starts -->
       <div
-        class="container-fluid"
+        class="container-fluid accordion"
         id="accordionExample"
         style="padding-bottom: 24px"
       ></div>
@@ -234,9 +241,9 @@
             data-original-title="Copy to clipboard"
           >
             <span
-              data-bs-original-title="Copy to Clipboard"
-              data-toggle="tooltip"
-              data-placement="right"
+              data-bs-title="Copy to Clipboard"
+              data-bs-toggle="tooltip"
+              data-bs-placement="right"
               class="btn-clipboard-tooltip-span"
             >
               &nbsp;&nbsp;&nbsp;Copy&nbsp;&nbsp;&nbsp;
