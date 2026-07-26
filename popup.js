@@ -3,6 +3,16 @@ var jsonToClipboard = "";
 
 document.getElementById("BtnRefresh").addEventListener("click", init);
 document.getElementById("BtnClear").addEventListener("click", clearAll);
+document.getElementById("BtnFullScreen").addEventListener("click", openFullScreen);
+
+function openFullScreen() {
+  const url = chrome.runtime.getURL("fullscreen.html");
+  if (chrome.tabs?.create) {
+    chrome.tabs.create({ url });
+  } else {
+    window.open(url, "_blank");
+  }
+}
 
 var txtAreaField = document.getElementById("atob");
 txtAreaField.addEventListener("input", function () {
