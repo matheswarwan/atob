@@ -3,7 +3,7 @@
     raw: {},
     sites: [],
     activeSite: null,
-    timeRange: "15m",
+    timeRange: "24h",
     sort: "desc",
     search: "",
     customFrom: null,
