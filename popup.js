@@ -261,7 +261,23 @@ $(function () {
   initTooltips(document);
 });
 
-$(".btn-clipboard").on("click", function () {
+function downloadJson(data, filename) {
+  var blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json",
+  });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(function () {
+    URL.revokeObjectURL(url);
+  }, 1000);
+}
+
+$("#BtnCopyJson").on("click", function () {
   var tipEl = document.querySelector(".btn-clipboard-tooltip-span");
   if (tipEl) {
     tipEl.setAttribute("data-bs-title", "Copied!");
@@ -271,7 +287,31 @@ $(".btn-clipboard").on("click", function () {
   }
   navigator.clipboard.writeText(JSON.stringify(jsonToClipboard));
 });
-$(".btn-clipboard").on("mouseover", function () {
+$("#BtnDownloadJson").on("click", function (e) {
+  e.preventDefault();
+  e.stopPropagation();
+  if (!jsonToClipboard) {
+    return;
+  }
+  var stamp = moment().format("YYYYMMDD-HHmmss");
+  downloadJson(jsonToClipboard, "mcp-event-" + stamp + ".json");
+  var tipEl = this;
+  var span = tipEl.querySelector("span");
+  var original = span ? span.textContent : tipEl.textContent;
+  if (span) {
+    span.textContent = " Saved ";
+  } else {
+    tipEl.textContent = "Saved";
+  }
+  setTimeout(function () {
+    if (span) {
+      span.textContent = original;
+    } else {
+      tipEl.textContent = original;
+    }
+  }, 1200);
+});
+$("#BtnCopyJson").on("mouseover", function () {
   var tipEl = document.querySelector(".btn-clipboard-tooltip-span");
   if (tipEl) {
     tipEl.setAttribute("data-bs-title", "Copy to clipboard!");

@@ -12,11 +12,23 @@ let storageWriteQueue = Promise.resolve();
 /** requestId -> pending event data captured in onBeforeRequest */
 const pendingRequests = new Map();
 
-function isEvergageEventRequest(request) {
+function isEvergageEventRequest(url) {
+  return url.indexOf("evergage.com/api2/event/") > -1;
+}
+
+function isDataCloudEventRequest(url) {
+  return (
+    url.indexOf("c360a.salesforce.com/web/events/") > -1 ||
+    url.indexOf(".c360a.salesforce.com/web/events/") > -1
+  );
+}
+
+function isTrackedEventRequest(request) {
   return (
     (request.method === "GET" || request.method === "POST") &&
     typeof request.url === "string" &&
-    request.url.indexOf("evergage.com/api2/event/") > -1
+    (isEvergageEventRequest(request.url) ||
+      isDataCloudEventRequest(request.url))
   );
 }
 
@@ -24,6 +36,30 @@ function decodeBase64Utf8(encodedString) {
   const binary = atob(encodedString);
   const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
   return new TextDecoder().decode(bytes);
+}
+
+function parseEventValue(eventValue) {
+  if (eventValue == null) {
+    throw new Error("Missing event value");
+  }
+  // Raw JSON
+  try {
+    return JSON.parse(eventValue);
+  } catch (_) {
+    // fall through
+  }
+  // Base64 JSON (Data Cloud / some Evergage POST bodies)
+  try {
+    return JSON.parse(decodeBase64Utf8(eventValue));
+  } catch (_) {
+    // fall through
+  }
+  // URL-encoded base64
+  try {
+    return JSON.parse(decodeBase64Utf8(decodeURIComponent(eventValue)));
+  } catch (_) {
+    throw new Error("Unable to parse event payload value");
+  }
 }
 
 function extractPayload(request) {
@@ -34,17 +70,12 @@ function extractPayload(request) {
     if (!encodedString) {
       throw new Error("Missing event query parameter");
     }
-    return JSON.parse(decodeBase64Utf8(encodedString));
+    return parseEventValue(encodedString);
   }
 
   const formEvent = request.requestBody?.formData?.event?.[0];
   if (formEvent) {
-    // formData event may be raw JSON or base64 depending on beacon version
-    try {
-      return JSON.parse(formEvent);
-    } catch (_) {
-      return JSON.parse(decodeBase64Utf8(formEvent));
-    }
+    return parseEventValue(formEvent);
   }
 
   const rawBytes = request.requestBody?.raw?.[0]?.bytes;
@@ -53,21 +84,16 @@ function extractPayload(request) {
     try {
       return JSON.parse(rawText);
     } catch (_) {
-      // application/x-www-form-urlencoded: event=<payload>
       const params = new URLSearchParams(rawText);
       const eventValue = params.get("event");
       if (!eventValue) {
         throw new Error("Missing event field in POST body");
       }
-      try {
-        return JSON.parse(eventValue);
-      } catch (_) {
-        return JSON.parse(decodeBase64Utf8(eventValue));
-      }
+      return parseEventValue(eventValue);
     }
   }
 
-  throw new Error("Unable to extract Evergage event payload from request");
+  throw new Error("Unable to extract event payload from request");
 }
 
 function getWebsiteName(request) {
@@ -90,6 +116,15 @@ function getWebsiteName(request) {
 
 function buildHostKey(request, websiteName) {
   const url = new URL(request.url);
+
+  if (isDataCloudEventRequest(request.url)) {
+    const pathParts = url.pathname.split("/").filter(Boolean);
+    // /web/events/<app-id>
+    const appId = pathParts[pathParts.length - 1] || "unknown";
+    const shortId = appId.length > 12 ? appId.slice(0, 8) : appId;
+    return websiteName + " | Data Cloud (app: " + shortId + ")";
+  }
+
   const evergageHost = url.hostname.split(".")[0];
   const pathParts = url.pathname.split("/").filter(Boolean);
   const datasetName = pathParts[pathParts.length - 1] || "unknown";
@@ -108,6 +143,7 @@ function saveEvent(request, payload, statusCode) {
     datetime: Date.now(),
     website: websiteName,
     statusCode: statusCode,
+    sdk: isDataCloudEventRequest(request.url) ? "data-cloud" : "evergage",
   };
 
   storageWriteQueue = storageWriteQueue
@@ -136,7 +172,7 @@ function saveEvent(request, payload, statusCode) {
         })
     )
     .catch((e) => {
-      console.error("Failed to persist Evergage event", e);
+      console.error("Failed to persist event", e);
     });
 }
 
@@ -151,7 +187,7 @@ function finalizeRequest(requestId, statusCode) {
 
 chrome.webRequest.onBeforeRequest.addListener(
   function (request) {
-    if (!isEvergageEventRequest(request)) {
+    if (!isTrackedEventRequest(request)) {
       return;
     }
     try {
@@ -166,7 +202,7 @@ chrome.webRequest.onBeforeRequest.addListener(
         payload: payload,
       });
     } catch (e) {
-      console.error("Failed to parse Evergage event request", request.url, e);
+      console.error("Failed to parse tracked event request", request.url, e);
     }
   },
   { urls: ["<all_urls>"] },
@@ -175,7 +211,7 @@ chrome.webRequest.onBeforeRequest.addListener(
 
 chrome.webRequest.onCompleted.addListener(
   function (request) {
-    if (!isEvergageEventRequest(request)) {
+    if (!isTrackedEventRequest(request)) {
       return;
     }
     finalizeRequest(request.requestId, request.statusCode);
@@ -185,7 +221,7 @@ chrome.webRequest.onCompleted.addListener(
 
 chrome.webRequest.onErrorOccurred.addListener(
   function (request) {
-    if (!isEvergageEventRequest(request)) {
+    if (!isTrackedEventRequest(request)) {
       return;
     }
     // Still record the attempt; statusCode null marks transport failure in UI.

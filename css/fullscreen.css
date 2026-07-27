@@ -460,6 +460,13 @@ body {
   word-break: break-all;
 }
 
+.fs-detail-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .fs-detail {
   display: flex;
   flex-direction: column;

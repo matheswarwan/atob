@@ -20,6 +20,7 @@ This addon logs all events that are sent to Salesforce's Marketing Cloud Persona
 
 7. When an event is recorded, the addon would change color for 5 seconds and it’ll be available in the addon's popup.
 8. Click **Full Screen** in the popup to open the Event Explorer: site tabs, time-range filters, and an Interaction Studio-style event stream.
+9. Use **Download JSON** / **Download Filtered** to export event payloads.
 
 <img src="gitImages/2.png" width="200px" height="250px"/>
 
