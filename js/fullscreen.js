@@ -49,6 +49,25 @@
 
   function getActionName(payload) {
     if (!payload || typeof payload !== "object") return "Unknown event";
+
+    // Data Cloud Web SDK batches: { events: [ { eventType, interactionName, pageName } ] }
+    if (Array.isArray(payload.events) && payload.events.length) {
+      const preferred =
+        payload.events.find(
+          (e) =>
+            e &&
+            (e.eventType === "pageView" ||
+              e.interactionName ||
+              e.pageName)
+        ) || payload.events[0];
+      return (
+        preferred.interactionName ||
+        preferred.pageName ||
+        preferred.eventType ||
+        "Data Cloud Event"
+      );
+    }
+
     return (
       payload.action ||
       payload.itemAction ||
@@ -60,6 +79,12 @@
   }
 
   function getPageUrl(payload, fallbackUrl) {
+    if (Array.isArray(payload?.events) && payload.events.length) {
+      const withUrl = payload.events.find((e) => e?.pageUrl || e?.sourceUrl);
+      if (withUrl) {
+        return withUrl.pageUrl || withUrl.sourceUrl;
+      }
+    }
     return (
       payload?.source?.url ||
       payload?.url ||
@@ -69,10 +94,26 @@
   }
 
   function getPageType(payload) {
+    if (Array.isArray(payload?.events) && payload.events.length) {
+      const withType = payload.events.find(
+        (e) => e?.sourcePageType || e?.eventType
+      );
+      if (withType) {
+        return withType.sourcePageType || withType.eventType || "";
+      }
+    }
     return payload?.source?.pageType || payload?.pageType || "";
   }
 
   function getItemAction(payload) {
+    if (Array.isArray(payload?.events) && payload.events.length) {
+      const types = payload.events
+        .map((e) => e?.eventType)
+        .filter(Boolean);
+      if (types.length) {
+        return types.slice(0, 3).join(", ");
+      }
+    }
     return payload?.itemAction || payload?.interaction?.name || "";
   }
 
