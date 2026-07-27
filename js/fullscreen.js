@@ -141,6 +141,61 @@
     return payload?.itemAction || payload?.interaction?.name || "";
   }
 
+  function getEventTimestamp(payload, fallbackTs) {
+    // Prefer the SDK/event timestamp (ms precision) over extension receive time.
+    const normalizeEpoch = (value) => {
+      if (typeof value !== "number" || !Number.isFinite(value)) return null;
+      // Seconds vs milliseconds heuristic
+      if (value > 0 && value < 1e11) return value * 1000;
+      return value;
+    };
+
+    if (payload && typeof payload === "object") {
+      if (Array.isArray(payload.events) && payload.events.length) {
+        const times = payload.events
+          .map((e) => {
+            if (!e) return null;
+            if (typeof e.dateTime === "string" || e.dateTime instanceof Date) {
+              const parsed = Date.parse(e.dateTime);
+              return Number.isFinite(parsed) ? parsed : null;
+            }
+            return normalizeEpoch(e.dateTime) || normalizeEpoch(e.time);
+          })
+          .filter((t) => Number.isFinite(t));
+        if (times.length) {
+          // Use the newest nested event time for the batch card.
+          return Math.max.apply(null, times);
+        }
+      }
+
+      const sourceTime = normalizeEpoch(payload.source && payload.source.time);
+      if (sourceTime != null) return sourceTime;
+
+      const topTime = normalizeEpoch(payload.time);
+      if (topTime != null) return topTime;
+
+      if (typeof payload.dateTime === "string") {
+        const parsed = Date.parse(payload.dateTime);
+        if (Number.isFinite(parsed)) return parsed;
+      }
+    }
+
+    const fallback = Number(fallbackTs);
+    return Number.isFinite(fallback) ? fallback : Date.now();
+  }
+
+  function compareByTime(a, b, ascending) {
+    const diff = a.ts - b.ts;
+    if (diff !== 0) {
+      return ascending ? diff : -diff;
+    }
+    // Stable tie-breaker when timestamps collide.
+    if (a.index !== b.index) {
+      return ascending ? a.index - b.index : b.index - a.index;
+    }
+    return String(a.id).localeCompare(String(b.id));
+  }
+
   function normalizeEvents(raw) {
     const bySite = {};
     let total = 0;
@@ -153,29 +208,50 @@
         const key = Object.keys(row || {})[0];
         if (!key) return;
         const entry = row[key] || {};
-        const ts = Number(entry.datetime || key);
-        if (!Number.isFinite(ts)) return;
-
         const payload = entry.payload || {};
+        const capturedAt = Number(entry.eventTime || entry.datetime || key);
         const statusCode = getStatusCode(entry);
-        const id = site + "::" + key + "::" + index;
+        const requestUrl = entry.url || "";
 
-        bySite[site].push({
-          id,
-          site,
-          ts,
-          statusCode,
-          payload,
-          url: entry.url || "",
-          action: getActionName(payload),
-          itemAction: getItemAction(payload),
-          pageUrl: getPageUrl(payload, entry.url),
-          pageType: getPageType(payload),
+        // Expand Data Cloud batches so each nested event sorts on its own ms timestamp.
+        const nestedEvents =
+          Array.isArray(payload.events) && payload.events.length > 1
+            ? payload.events
+            : null;
+
+        const units = nestedEvents
+          ? nestedEvents.map((nested, nestedIndex) => ({
+              nestedPayload: { events: [nested] },
+              nestedIndex,
+            }))
+          : [{ nestedPayload: payload, nestedIndex: 0 }];
+
+        units.forEach(({ nestedPayload, nestedIndex }) => {
+          const ts = getEventTimestamp(
+            nestedPayload,
+            Number.isFinite(capturedAt) ? capturedAt : Date.now()
+          );
+          if (!Number.isFinite(ts)) return;
+
+          bySite[site].push({
+            id: site + "::" + key + "::" + index + "::" + nestedIndex,
+            site,
+            index: index * 1000 + nestedIndex,
+            ts,
+            capturedAt: Number.isFinite(capturedAt) ? capturedAt : ts,
+            statusCode,
+            payload: nestedPayload,
+            url: requestUrl,
+            action: getActionName(nestedPayload),
+            itemAction: getItemAction(nestedPayload),
+            pageUrl: getPageUrl(nestedPayload, requestUrl),
+            pageType: getPageType(nestedPayload),
+          });
+          total += 1;
         });
-        total += 1;
       });
 
-      bySite[site].sort((a, b) => b.ts - a.ts);
+      bySite[site].sort((a, b) => compareByTime(a, b, false));
     });
 
     return { bySite, total };
@@ -232,9 +308,7 @@
       return haystack.includes(q);
     });
 
-    filtered.sort((a, b) =>
-      state.sort === "asc" ? a.ts - b.ts : b.ts - a.ts
-    );
+    filtered.sort((a, b) => compareByTime(a, b, state.sort === "asc"));
     return filtered;
   }
 
@@ -339,7 +413,9 @@
                   </div>
                 </div>
                 <div class="fs-event-time">
-                  <strong>${escapeHtml(moment(event.ts).format("HH:mm:ss"))}</strong>
+                  <strong>${escapeHtml(
+                    moment(event.ts).format("HH:mm:ss.SSS")
+                  )}</strong>
                   ${escapeHtml(moment(event.ts).format("MMM D, YYYY"))}<br/>
                   ${escapeHtml(moment(event.ts).fromNow())}
                 </div>
@@ -381,7 +457,7 @@
           event.itemAction || "—"
         )}</div></div>
         <div class="fs-kv"><label>Time</label><div>${escapeHtml(
-          moment(event.ts).format("YYYY-MM-DD HH:mm:ss")
+          moment(event.ts).format("YYYY-MM-DD HH:mm:ss.SSS")
         )} (${escapeHtml(moment(event.ts).fromNow())})</div></div>
         <div class="fs-kv"><label>Status</label><div style="color:${
           ok ? "var(--ck-success)" : "var(--ck-danger)"
