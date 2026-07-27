@@ -18,8 +18,11 @@
             <p>Interaction Studio-style time-series view of captured events</p>
           </div>
         </div>
-        <div class="fs-header-actions">
+          <div class="fs-header-actions">
           <span class="fs-stat" id="fsTotalStat">0 events</span>
+          <button class="fs-btn" id="BtnFsDownloadFiltered" type="button">
+            Download Filtered
+          </button>
           <button class="fs-btn" id="BtnFsRefresh" type="button">Refresh</button>
           <button class="fs-btn fs-btn-danger" id="BtnFsClear" type="button">
             Clear All
@@ -93,9 +96,14 @@
         <aside class="fs-panel fs-detail">
           <div class="fs-panel-header">
             <h2>Event details</h2>
-            <button class="fs-btn fs-btn-primary" id="BtnCopyJson" type="button">
-              Copy JSON
-            </button>
+            <div class="fs-detail-actions">
+              <button class="fs-btn" id="BtnDownloadJson" type="button">
+                Download JSON
+              </button>
+              <button class="fs-btn fs-btn-primary" id="BtnCopyJson" type="button">
+                Copy JSON
+              </button>
+            </div>
           </div>
           <div class="fs-detail-body" id="fsDetailBody">
             <div class="fs-empty">

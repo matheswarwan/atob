@@ -35,6 +35,30 @@
       .replace(/'/g, "&#39;");
   }
 
+  function downloadJson(data, filename) {
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function flashButtonLabel(buttonId, label) {
+    const btn = document.getElementById(buttonId);
+    if (!btn) return;
+    const original = btn.textContent;
+    btn.textContent = label;
+    setTimeout(() => {
+      btn.textContent = original;
+    }, 1200);
+  }
+
   function getData() {
     return new Promise((resolve) => {
       chrome.storage.local.get(null, (items) => resolve(items || {}));
@@ -443,6 +467,64 @@
         console.error("Copy failed", e);
       }
     });
+
+    document.getElementById("BtnDownloadJson").addEventListener("click", () => {
+      if (!state.selectedPayload) return;
+      const selected = (getFilteredEvents() || []).find(
+        (e) => e.id === state.selectedEventId
+      );
+      const stamp = moment(selected?.ts || Date.now()).format("YYYYMMDD-HHmmss");
+      const safeAction = String(selected?.action || "event")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")
+        .slice(0, 40);
+      downloadJson(
+        state.selectedPayload,
+        "mcp-event-" + safeAction + "-" + stamp + ".json"
+      );
+      flashButtonLabel("BtnDownloadJson", "Downloaded!");
+    });
+
+    document
+      .getElementById("BtnFsDownloadFiltered")
+      .addEventListener("click", () => {
+        const events = getFilteredEvents();
+        if (!events.length) return;
+        const exportPayload = {
+          exportedAt: new Date().toISOString(),
+          site: state.activeSite,
+          timeRange: state.timeRange,
+          search: state.search,
+          sort: state.sort,
+          count: events.length,
+          events: events.map((event) => ({
+            id: event.id,
+            timestamp: event.ts,
+            isoTime: new Date(event.ts).toISOString(),
+            action: event.action,
+            itemAction: event.itemAction,
+            pageType: event.pageType,
+            pageUrl: event.pageUrl,
+            statusCode: event.statusCode,
+            requestUrl: event.url,
+            payload: event.payload,
+          })),
+        };
+        const stamp = moment().format("YYYYMMDD-HHmmss");
+        const sitePart = String(state.activeSite || "all")
+          .split("|")[0]
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "")
+          .slice(0, 40);
+        downloadJson(
+          exportPayload,
+          "mcp-events-" + sitePart + "-" + stamp + ".json"
+        );
+        flashButtonLabel("BtnFsDownloadFiltered", "Downloaded!");
+      });
 
     els.tabs.addEventListener("click", (e) => {
       const tab = e.target.closest(".fs-tab");
