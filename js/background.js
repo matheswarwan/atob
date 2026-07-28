@@ -133,16 +133,57 @@ function buildHostKey(request, websiteName) {
   return websiteName + " | " + evergageHost + " (ds: " + datasetName + ")";
 }
 
+function extractEventTime(payload) {
+  if (!payload || typeof payload !== "object") return null;
+
+  const normalizeEpoch = (value) => {
+    if (typeof value !== "number" || !Number.isFinite(value)) return null;
+    // Seconds vs milliseconds heuristic
+    if (value > 0 && value < 1e11) return value * 1000;
+    return value;
+  };
+
+  if (Array.isArray(payload.events) && payload.events.length) {
+    const times = payload.events
+      .map((e) => {
+        if (!e) return null;
+        if (typeof e.dateTime === "string") {
+          const parsed = Date.parse(e.dateTime);
+          return Number.isFinite(parsed) ? parsed : null;
+        }
+        return normalizeEpoch(e.dateTime) || normalizeEpoch(e.time);
+      })
+      .filter((t) => Number.isFinite(t));
+    if (times.length) return Math.max.apply(null, times);
+  }
+
+  const sourceTime = normalizeEpoch(payload.source && payload.source.time);
+  if (sourceTime != null) return sourceTime;
+
+  const topTime = normalizeEpoch(payload.time);
+  if (topTime != null) return topTime;
+
+  if (typeof payload.dateTime === "string") {
+    const parsed = Date.parse(payload.dateTime);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+
+  return null;
+}
+
 function saveEvent(request, payload, statusCode) {
   const websiteName = getWebsiteName(request);
   const hostName = buildHostKey(request, websiteName);
-  const epocheDate = Date.now().toString();
+  const capturedAt = Date.now();
+  const eventTime = extractEventTime(payload) || capturedAt;
+  const epocheDate = String(eventTime) + "-" + String(capturedAt);
 
   const isPayload = {};
   isPayload[epocheDate] = {
     url: request.url,
     payload: payload,
-    datetime: Date.now(),
+    datetime: capturedAt,
+    eventTime: eventTime,
     website: websiteName,
     statusCode: statusCode,
     sdk: isDataCloudEventRequest(request.url) ? "data-cloud" : "evergage",
