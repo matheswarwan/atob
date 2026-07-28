@@ -1,3 +1,5 @@
+importScripts("sdk-config.js");
+
 console.log("Background js loaded..");
 
 const CONFIG = {
@@ -229,3 +231,119 @@ chrome.webRequest.onErrorOccurred.addListener(
   },
   { urls: ["<all_urls>"] }
 );
+
+/* ---------------- SDK Force URL + Local Edit ---------------- */
+
+async function injectLocalSdk(tabId) {
+  const settings = await readMcpSettings();
+  if (!settings.localEdit.enabled || !settings.localEdit.edited) {
+    return { injected: false, reason: "disabled" };
+  }
+
+  const code = settings.localEdit.edited;
+  await chrome.scripting.executeScript({
+    target: { tabId },
+    world: "MAIN",
+    func: (sdkCode, meta) => {
+      try {
+        if (window.__MCP_LOCAL_SDK_INJECTED__) {
+          return;
+        }
+        window.__MCP_LOCAL_SDK_INJECTED__ = true;
+        window.__MCP_LOCAL_SDK_META__ = meta;
+        // executeScript MAIN-world code is not subject to page CSP.
+        (0, eval)(sdkCode);
+      } catch (err) {
+        console.error("[MCP Logger] Local Edit SDK injection failed", err);
+        window.__MCP_LOCAL_SDK_ERROR__ = String(err && err.message ? err.message : err);
+      }
+    },
+    args: [
+      code,
+      {
+        fileName: settings.localEdit.fileName || "local-edit.js",
+        sourceUrl: settings.localEdit.sourceUrl || "",
+        updatedAt: settings.localEdit.updatedAt || null,
+      },
+    ],
+  });
+
+  return { injected: true };
+}
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  const type = message && message.type;
+
+  if (type === "MCP_GET_SETTINGS") {
+    readMcpSettings().then((settings) => sendResponse({ ok: true, settings }));
+    return true;
+  }
+
+  if (type === "MCP_SAVE_SETTINGS") {
+    writeMcpSettings(message.settings)
+      .then((settings) => syncSdkDnrRules(settings).then(() => settings))
+      .then((settings) => sendResponse({ ok: true, settings }))
+      .catch((err) =>
+        sendResponse({ ok: false, error: String(err && err.message ? err.message : err) })
+      );
+    return true;
+  }
+
+  if (type === "MCP_FETCH_SDK") {
+    const url = String(message.url || "").trim();
+    fetch(url)
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error("HTTP " + res.status + " fetching SDK");
+        }
+        const text = await res.text();
+        let fileName = "sdk.js";
+        try {
+          const path = new URL(url).pathname;
+          fileName = path.split("/").pop() || fileName;
+        } catch (_) {}
+        sendResponse({ ok: true, text, fileName, contentType: res.headers.get("content-type") });
+      })
+      .catch((err) =>
+        sendResponse({ ok: false, error: String(err && err.message ? err.message : err) })
+      );
+    return true;
+  }
+
+  if (type === "MCP_INJECT_LOCAL_SDK") {
+    const tabId = message.tabId || (sender.tab && sender.tab.id);
+    if (!tabId) {
+      sendResponse({ ok: false, error: "No tab id" });
+      return false;
+    }
+    injectLocalSdk(tabId)
+      .then((result) => sendResponse({ ok: true, ...result }))
+      .catch((err) =>
+        sendResponse({ ok: false, error: String(err && err.message ? err.message : err) })
+      );
+    return true;
+  }
+
+  if (type === "MCP_CLEAR_EVENTS_KEEP_SETTINGS") {
+    readMcpSettings().then((settings) => {
+      chrome.storage.local.clear(() => {
+        chrome.storage.local.set({ [MCP_SETTINGS_KEY]: settings }, () => {
+          syncSdkDnrRules(settings).finally(() => sendResponse({ ok: true }));
+        });
+      });
+    });
+    return true;
+  }
+
+  return false;
+});
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== "local" || !changes[MCP_SETTINGS_KEY]) return;
+  const settings = mergeSettings(changes[MCP_SETTINGS_KEY].newValue);
+  syncSdkDnrRules(settings).catch((e) => console.error(e));
+});
+
+readMcpSettings()
+  .then((settings) => syncSdkDnrRules(settings))
+  .catch((e) => console.error("Initial SDK DNR sync failed", e));

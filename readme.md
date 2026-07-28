@@ -26,3 +26,8 @@ This addon logs all events that are sent to Salesforce's Marketing Cloud Persona
 
 Note:
 Both 'GET' request with encoded payload & 'POST' request with formData & event payload are supported.
+
+## SDK Tools
+Open **SDK Tools** from the popup to:
+1. **Force SDK URL** — redirect `evergage.min.js` / `c360a.min.js` CDN requests to a URL you choose
+2. **Local Edit** — load an SDK JS file, edit it, inject the edited script into pages, download it, and compare against the original

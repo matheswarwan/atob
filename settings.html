@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SDK Tools — MCP Logger</title>
+    <link rel="stylesheet" href="./css/settings.css" />
+  </head>
+  <body>
+    <div class="st-shell">
+      <header class="st-header">
+        <div>
+          <h1>SDK Tools</h1>
+          <p>Force SDK URL and Local Edit for Evergage / Data Cloud beacons</p>
+        </div>
+        <div class="st-actions">
+          <button class="st-btn" id="BtnOpenExplorer" type="button">Event Explorer</button>
+          <button class="st-btn st-btn-primary" id="BtnSaveAll" type="button">Save settings</button>
+        </div>
+      </header>
+
+      <section class="st-card">
+        <h2>Force SDK URL</h2>
+        <p class="hint">
+          When enabled, CDN requests for <code>evergage.min.js</code> /
+          <code>c360a.min.js</code> are redirected to your URL (same idea as
+          “Force SDK URL” in Personalization tools).
+        </p>
+        <div class="st-row">
+          <div class="st-label">Enable Force SDK URL</div>
+          <label class="st-switch">
+            <input type="checkbox" id="forceEnabled" />
+            <span></span>
+          </label>
+        </div>
+        <label class="st-label" for="forceUrl">SDK URL</label>
+        <input
+          class="st-input"
+          id="forceUrl"
+          type="url"
+          placeholder="https://cdn.evgnet.com/beacon/.../scripts/evergage.min.js"
+        />
+        <p class="hint" style="margin-top: 10px; margin-bottom: 0">
+          Enable the option above to redirect installed SDK script requests to
+          this URL.
+        </p>
+      </section>
+
+      <section class="st-card">
+        <h2>Local Edit</h2>
+        <p class="hint">
+          Load <code>evergage.min.js</code> or <code>c360a.min.js</code>, edit
+          it here, inject the edited script into pages (CDN copy is blocked),
+          save, and compare against the original.
+        </p>
+
+        <div class="st-row">
+          <div class="st-label">Enable Local Edit injection</div>
+          <label class="st-switch">
+            <input type="checkbox" id="localEnabled" />
+            <span></span>
+          </label>
+        </div>
+
+        <label class="st-label" for="sdkSourceUrl">Load SDK from URL</label>
+        <div class="st-grid-2" style="margin-bottom: 8px">
+          <input
+            class="st-input"
+            id="sdkSourceUrl"
+            type="url"
+            placeholder="https://cdn.evgnet.com/.../evergage.min.js or https://cdn.c360a.salesforce.com/.../c360a.min.js"
+          />
+          <button class="st-btn" id="BtnLoadSdk" type="button">Load</button>
+        </div>
+
+        <div class="st-toolbar">
+          <button class="st-btn" id="BtnLoadFile" type="button">Load from file</button>
+          <input id="fileInput" type="file" accept=".js,text/javascript,application/javascript" hidden />
+          <button class="st-btn" id="BtnResetEdited" type="button">Reset to original</button>
+          <button class="st-btn" id="BtnDownloadEdited" type="button">Download edited JS</button>
+          <button class="st-btn" id="BtnCompare" type="button">Compare with original</button>
+          <button class="st-btn st-btn-primary" id="BtnInjectTab" type="button">
+            Inject into active tab
+          </button>
+        </div>
+
+        <div class="st-meta">
+          <span id="metaFile">No file loaded</span>
+          <span id="metaChars"></span>
+          <span id="metaUpdated"></span>
+        </div>
+
+        <label class="st-label" for="sdkEditor">Editor</label>
+        <textarea class="st-editor" id="sdkEditor" spellcheck="false" placeholder="// Load an SDK file to begin local editing"></textarea>
+
+        <div class="st-diff" id="diffPanel">
+          <div class="st-diff-header">
+            <strong>Compare: original vs edited</strong>
+            <span id="diffStats"></span>
+          </div>
+          <div class="st-diff-body" id="diffBody"></div>
+        </div>
+      </section>
+
+      <div class="st-status" id="statusLine"></div>
+    </div>
+
+    <script src="./js/sdk-config.js"></script>
+    <script src="./js/settings.js"></script>
+  </body>
+</html>
