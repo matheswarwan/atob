@@ -1,3 +1,10 @@
-// Intentionally left without page injection.
-// Earlier builds injected a Freshbooks Evergage beacon on every site; that is unsafe.
-console.log("Interaction Studio (MCP) Logger content script loaded");
+// Runs at document_start. Requests local-edit SDK injection when enabled.
+(function () {
+  try {
+    chrome.runtime.sendMessage({ type: "MCP_INJECT_LOCAL_SDK" }, function () {
+      void chrome.runtime.lastError;
+    });
+  } catch (_) {
+    // Extension context may be unavailable during navigation edge cases.
+  }
+})();

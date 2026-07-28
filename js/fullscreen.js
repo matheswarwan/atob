@@ -146,6 +146,9 @@
     let total = 0;
 
     Object.keys(raw).forEach((site) => {
+      if (String(site).indexOf("__mcp_") === 0) {
+        return;
+      }
       const rows = Array.isArray(raw[site]) ? raw[site] : [];
       bySite[site] = [];
 
@@ -444,12 +447,22 @@
   function bindEvents() {
     document.getElementById("BtnFsRefresh").addEventListener("click", loadAndRender);
     document.getElementById("BtnFsClear").addEventListener("click", () => {
-      chrome.storage.local.clear(() => {
-        state.selectedEventId = null;
-        state.selectedPayload = null;
-        loadAndRender();
-      });
+      chrome.runtime.sendMessage(
+        { type: "MCP_CLEAR_EVENTS_KEEP_SETTINGS" },
+        () => {
+          state.selectedEventId = null;
+          state.selectedPayload = null;
+          loadAndRender();
+        }
+      );
     });
+
+    const sdkToolsBtn = document.getElementById("BtnFsSdkTools");
+    if (sdkToolsBtn) {
+      sdkToolsBtn.addEventListener("click", () => {
+        chrome.tabs.create({ url: chrome.runtime.getURL("settings.html") });
+      });
+    }
 
     document.getElementById("BtnCopyJson").addEventListener("click", async () => {
       if (!state.selectedPayload) return;

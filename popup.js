@@ -4,6 +4,7 @@ var jsonToClipboard = "";
 document.getElementById("BtnRefresh").addEventListener("click", init);
 document.getElementById("BtnClear").addEventListener("click", clearAll);
 document.getElementById("BtnFullScreen").addEventListener("click", openFullScreen);
+document.getElementById("BtnSdkTools").addEventListener("click", openSdkTools);
 
 function openFullScreen() {
   const url = chrome.runtime.getURL("fullscreen.html");
@@ -12,6 +13,19 @@ function openFullScreen() {
   } else {
     window.open(url, "_blank");
   }
+}
+
+function openSdkTools() {
+  const url = chrome.runtime.getURL("settings.html");
+  if (chrome.tabs?.create) {
+    chrome.tabs.create({ url });
+  } else {
+    window.open(url, "_blank");
+  }
+}
+
+function isReservedStorageKey(key) {
+  return key === "__mcp_settings__" || String(key).indexOf("__mcp_") === 0;
 }
 
 var txtAreaField = document.getElementById("atob");
@@ -73,7 +87,9 @@ async function init() {
 
   var o = await getData();
 
-  var listOfSites = Object.keys(o);
+  var listOfSites = Object.keys(o).filter(function (key) {
+    return !isReservedStorageKey(key);
+  });
 
   document.getElementById("accordionExample").innerHTML = ""; //Clear for first time
   if (listOfSites.length > 0) {
@@ -234,10 +250,13 @@ async function init() {
 
 async function clearAll() {
   return new Promise((resolve) => {
-    chrome.storage.local.clear(function () {
-      init();
-      resolve(true);
-    });
+    chrome.runtime.sendMessage(
+      { type: "MCP_CLEAR_EVENTS_KEEP_SETTINGS" },
+      function () {
+        init();
+        resolve(true);
+      }
+    );
   });
 }
 init();

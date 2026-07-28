@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SDK Tools — MCP Logger</title>
+    <link rel="stylesheet" href="./css/settings.css" />
+  </head>
+  <body>
+    <div class="st-shell">
+      <header class="st-header">
+        <div>
+          <h1>
+            SDK Tools
+            <span class="st-dirty" id="dirtyBadge">Unsaved settings</span>
+          </h1>
+          <p>
+            Redirect or edit Salesforce SDK scripts while testing Data Cloud
+            behavior.
+          </p>
+        </div>
+        <div class="st-actions">
+          <button class="st-btn" id="BtnOpenExplorer" type="button">
+            Event Explorer
+          </button>
+          <button class="st-btn st-btn-primary" id="BtnSaveAll" type="button">
+            Save settings
+          </button>
+        </div>
+      </header>
+
+      <div class="st-mode-switch" role="tablist" aria-label="SDK tool mode">
+        <button
+          type="button"
+          class="active"
+          id="TabRedirect"
+          role="tab"
+          aria-selected="true"
+          data-mode="redirect"
+        >
+          Redirect SDK
+        </button>
+        <button
+          type="button"
+          id="TabEdit"
+          role="tab"
+          aria-selected="false"
+          data-mode="edit"
+        >
+          Edit SDK
+        </button>
+      </div>
+
+      <!-- Redirect mode -->
+      <section
+        class="st-panel active"
+        id="PanelRedirect"
+        role="tabpanel"
+        aria-labelledby="TabRedirect"
+      >
+        <h2 class="st-panel-title">Redirect SDK requests</h2>
+        <p class="st-panel-desc">
+          Replace Salesforce SDK script requests with a specific JavaScript URL.
+        </p>
+
+        <div class="st-toggle-row">
+          <div class="st-toggle-copy">
+            <strong>Redirect Salesforce SDK requests</strong>
+            <p>
+              When enabled, requests for <code>evergage.min.js</code> and
+              <code>c360a.min.js</code> are redirected to the URL below.
+            </p>
+          </div>
+          <label class="st-switch" title="Toggle redirect">
+            <input type="checkbox" id="forceEnabled" />
+            <span></span>
+          </label>
+        </div>
+
+        <div class="st-field">
+          <label class="st-label" for="forceUrl">Replacement SDK URL</label>
+          <input
+            class="st-input"
+            id="forceUrl"
+            type="url"
+            placeholder="https://example.com/path/to/sdk.js"
+          />
+          <p class="st-help">
+            Use a full HTTPS URL. This setting applies to matching SDK requests
+            in browser tabs.
+          </p>
+          <span class="st-chip">Matches: evergage.min.js, c360a.min.js</span>
+        </div>
+
+        <div class="st-empty" id="redirectEmpty">
+          Redirect is off. SDK requests will load normally.
+        </div>
+      </section>
+
+      <!-- Edit mode -->
+      <section
+        class="st-panel"
+        id="PanelEdit"
+        role="tabpanel"
+        aria-labelledby="TabEdit"
+        hidden
+      >
+        <h2 class="st-panel-title">Edit a local SDK copy</h2>
+        <p class="st-panel-desc">
+          Load a JavaScript file, make temporary edits, and inject the edited
+          version into the active tab.
+        </p>
+
+        <div class="st-toggle-row">
+          <div class="st-toggle-copy">
+            <strong>Enable edited SDK injection</strong>
+            <p>
+              When enabled, CDN SDK scripts are blocked and your edited copy is
+              injected on page load.
+            </p>
+          </div>
+          <label class="st-switch" title="Toggle local edit injection">
+            <input type="checkbox" id="localEnabled" />
+            <span></span>
+          </label>
+        </div>
+
+        <div class="st-step">
+          <h3 class="st-step-title"><span>1</span>Load SDK</h3>
+          <label class="st-label" for="sdkSourceUrl">SDK source URL</label>
+          <div class="st-load-row">
+            <input
+              class="st-input"
+              id="sdkSourceUrl"
+              type="url"
+              placeholder="https://example.com/evergage.min.js"
+            />
+            <button class="st-btn" id="BtnLoadSdk" type="button">
+              Load from URL
+            </button>
+            <button class="st-btn" id="BtnLoadFile" type="button">
+              Load from file
+            </button>
+            <input
+              id="fileInput"
+              type="file"
+              accept=".js,text/javascript,application/javascript"
+              hidden
+            />
+          </div>
+          <p class="st-help">
+            Load from a URL or choose a local JavaScript file. The original is
+            kept for reset and comparison.
+          </p>
+          <div class="st-empty" id="editEmpty">
+            No SDK loaded yet. Load a JavaScript file to start editing.
+          </div>
+        </div>
+
+        <div class="st-step" id="StepEdit">
+          <h3 class="st-step-title"><span>2</span>Edit</h3>
+          <div class="st-editor-shell">
+            <div class="st-editor-meta">
+              <span id="metaFile"><strong>Source:</strong> None</span>
+              <span id="metaChars"></span>
+              <span id="metaUpdated"></span>
+              <span id="metaDirtyEdit"></span>
+            </div>
+            <textarea
+              class="st-editor"
+              id="sdkEditor"
+              spellcheck="false"
+              placeholder="Load an SDK to begin editing."
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="st-step" id="StepUse">
+          <h3 class="st-step-title"><span>3</span>Use edited SDK</h3>
+          <div class="st-editor-actions">
+            <button class="st-btn st-btn-primary" id="BtnInjectTab" type="button">
+              Inject into active tab
+            </button>
+            <button class="st-btn" id="BtnCompare" type="button">
+              Compare changes
+            </button>
+            <button class="st-btn" id="BtnDownloadEdited" type="button">
+              Download edited JS
+            </button>
+            <button class="st-btn st-btn-ghost" id="BtnResetEdited" type="button">
+              Reset to original
+            </button>
+          </div>
+          <p class="st-help">
+            Injection affects the active tab only. Download saves your edited
+            copy as a JavaScript file.
+          </p>
+
+          <div class="st-diff" id="diffPanel">
+            <div class="st-diff-header">
+              <strong>Changes compared with original</strong>
+              <div>
+                <span id="diffStats"></span>
+                <button class="st-btn st-btn-ghost" id="BtnHideDiff" type="button">
+                  Hide comparison
+                </button>
+              </div>
+            </div>
+            <div class="st-diff-body" id="diffBody"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="st-footer-status" id="statusLine" role="status">
+        Ready.
+      </div>
+    </div>
+
+    <script src="./js/sdk-config.js"></script>
+    <script src="./js/settings.js"></script>
+  </body>
+</html>
