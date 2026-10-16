@@ -1,3 +1,5 @@
+> **Moved:** this project now lives at [matheswarwan/mcp-personalization-logger](https://github.com/matheswarwan/mcp-personalization-logger). This repo is archived.
+
 # Introduction: 
 This addon logs all events that are sent to Salesforce's Marketing Cloud Personalization server by evergage.min.js beacon, and stores the event details in local storage. As the payload is base64 encoded, the add-on decodes it and displays a formatted JSON content that would be easy for developers and testers to debug the app.
 
